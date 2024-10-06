@@ -1,6 +1,6 @@
 # vue-evm-nft
 
-This package provides reusable [Vue 3](https://vuejs.org/) composable functions, [Pinia](https://pinia.vuejs.org/) stores, and utilities for working with NFTs on [EVM-compatible ](https://ethereum.org/en/developers/docs/evm/)blockchains like [Ethereum](https://ethereum.org/en/), [Avalanche](https://www.avax.network/), [Polygon](https://polygon.technology/), ](https://www.bnbchain.org/en/bnb-smart-chain), and more. 
+This package provides reusable [Vue 3](https://vuejs.org/) composable functions, [Pinia](https://pinia.vuejs.org/) stores, and utilities for working with NFTs on [EVM-compatible ](https://ethereum.org/en/developers/docs/evm/)blockchains like [Ethereum](https://ethereum.org/en/), [Avalanche](https://www.avax.network/), [Polygon](https://polygon.technology/), [Binance Smart Chain](https://www.bnbchain.org/en/bnb-smart-chain) and more. 
 
 No API is needed, the blockchain is the API!
 
