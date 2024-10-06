@@ -1,8 +1,10 @@
 # vue-evm-nft
 
-This package provides reusable Vue 3 components, Pinia stores, and utilities for working with NFTs directly on EVM-compatible blockchains. No API is needed, the blockchain is the API. This package includes dependencies such as `axios`, `ethers.js`, `pinia`, and `vue` to ensure smooth integration with your Vue 3 project.
+This package provides reusable Vue 3 components, Pinia stores, and utilities for working with NFTs directly on EVM-compatible blockchains. No API is needed, the blockchain is the API!
 
-Your project should already have these installed, this package has been tested with...
+![](https://i.imgur.com/IF9VaIa.jpg)
+
+This package includes dependencies such as `axios`, `ethers.js`, `pinia`, and `vue` to ensure smooth integration with your Vue 3 project. Your project should already have these installed, this package has been tested with...
 
 - axios 1.7.7
 - ethers.js 6.13.3
