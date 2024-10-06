@@ -20,6 +20,14 @@
   "author": "Kid Sysco",
   "license": "ISC",
   "description": "Vue 3 components, Pinia stores, and utilities for working with NFTs directly on EVM-compatible blockchains. No API is needed, the blockchain is the API.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Dig-A-Hash/vue-evm-nft"
+  },
+  "bugs": {
+    "url": "https://github.com/Dig-A-Hash/vue-evm-nft/issues"
+  },
+  "homepage": "https://github.com/Dig-A-Hash/vue-evm-nft",
   "peerDependencies": {
     "axios": "^1.0.0",
     "ethers": "^6.0.0",
