@@ -1,25 +1,8 @@
 export const blockchains = {
-  fantom: {
-    chainId: 250,
-    name: 'Fantom',
-    enabled: true,
-    isTestnet: false,
-    env: 'Mainnet',
-    explorerName: 'Fantom Mainnet Explorer',
-    explorerUrl: 'https://ftmscan.com/',
-    nativeCurrency: {
-      name: 'FTM',
-      symbol: 'FTM',
-      decimals: 18,
-    },
-    publicRpc: 'https://rpc.ankr.com/fantom/',
-  },
   avalanche: {
     chainId: 43114,
     name: 'Avalanche',
     enabled: true,
-    isTestnet: false,
-    env: 'Mainnet',
     explorerName: 'SnowTrace Explorer',
     explorerUrl: 'https://snowtrace.io/',
     nativeCurrency: {
@@ -29,13 +12,37 @@ export const blockchains = {
     },
     publicRpc: 'https://api.avax.network/ext/bc/C/rpc',
   },
+  ethereum: {
+    chainId: 1,
+    name: 'Ethereum',
+    enabled: true,
+    iconUrl: '/img/blockchain-logos/eth.png',
+    explorerName: 'EtherScan Explorer',
+    explorerUrl: 'https://etherscan.io/',
+    nativeCurrency: {
+      name: 'Ether',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    publicRpc: 'https://cloudflare-eth.com',
+  },
+  fantom: {
+    chainId: 250,
+    name: 'Fantom',
+    enabled: true,
+    explorerName: 'Fantom Mainnet Explorer',
+    explorerUrl: 'https://ftmscan.com/',
+    nativeCurrency: {
+      name: 'FTM',
+      symbol: 'FTM',
+      decimals: 18,
+    },
+    publicRpc: 'https://rpc.ankr.com/fantom/',
+  },
   polygon: {
-    chainId: import.meta.env.VITE_POLYGON_MAINNET_CHAIN_ID,
     name: 'Polygon',
     chainId: 137,
     enabled: true,
-    isTestnet: false,
-    env: 'Mainnet',
     explorerName: 'Polygon Explorer',
     explorerUrl: 'https://polygonscan.com/',
     nativeCurrency: {
@@ -43,9 +50,11 @@ export const blockchains = {
       symbol: 'POL',
       decimals: 18,
     },
-    // publicRpc: 'https://rpc.ankr.com/polygon', // X
     publicRpc: 'https://polygon-rpc.com',
-    // publicRpc: 'https://polygon.llamarpc.com',
-    // publicRpc: 'https://1rpc.io/matic', //X
+    altPublicRpc: [
+      'https://rpc.ankr.com/polygon',
+      'https://polygon.llamarpc.com',
+      'https://1rpc.io/matic',
+    ],
   },
 };
