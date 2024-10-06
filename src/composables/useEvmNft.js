@@ -34,7 +34,6 @@ export async function useEvmNft(
   chainId
 ) {
   const contract = new ethers.Contract(contractAddress, contractABI, provider);
-  var balance = 0;
   contractOwnerPublicKey = contractOwnerPublicKey.toLowerCase();
   contractAddress = contractAddress.toLowerCase();
   const loadingMessage = ref('');
@@ -119,7 +118,7 @@ export async function useEvmNft(
     } else {
       // Get tokens for specified wallet.
       // Ensure correct token ID ranges by adjusting i logic.
-      for (let i = endIndex; i >= startIndex; i--) {
+      for (let i = endIndex - 1; i >= startIndex; i--) {
         batchedTokenIdPromises.push(
           contract
             .tokenOfOwnerByIndex(holderPublicKey, i)
