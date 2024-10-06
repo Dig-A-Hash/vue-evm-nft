@@ -31,10 +31,7 @@ import {
   useEvmNftGallery,
   blockchains,
   dahDemoV1Abi as abi,
-  useNftStore,
 } from 'vue-evm-nft';
-
-const nftStore = useNftStore();
 
 const { page, numberOfPages, nfts, isAscending, onChangeSortOrder } =
   useEvmNftGallery(
