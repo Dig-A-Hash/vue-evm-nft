@@ -11,12 +11,11 @@ Your project should already have these installed, this package has been tested w
 
 ## Installation
 
-You can install the package directly from npm when it is published:
+You can install the package directly from npm:
 
 ```bash
 npm install vue-evm-nft
 ```
-Or, you can test the package locally using npm link as outlined below.
 
 # Docs
 This project is free and open source, although it was originally built to work with [Dig-A-Hash Dynamic Meta Data Services](https://www.dig-a-hash.com). We build lots of websites that display NFTs, so this component was super useful to us. However, Dig-A-Hash specific settings have been removed from this package so that these components can be used for any NFT project, on any EVM-compatible blockchain. 
