@@ -1,6 +1,6 @@
 # vue-evm-nft
 
-This package provides reusable [Vue 3](https://vuejs.org/) composable functions, [Pinia](https://pinia.vuejs.org/) stores, and utilities for working with NFTs on [EVM-compatible ](https://ethereum.org/en/developers/docs/evm/)blockchains like [Ethereum](https://ethereum.org/en/), [Avalanche](https://www.avax.network/), [Polygon](https://polygon.technology/), [Binance Smart Chain](https://www.bnbchain.org/en/bnb-smart-chain) and more. 
+This package provides reusable [Vue 3](https://vuejs.org/) composable functions, [Pinia](https://pinia.vuejs.org/) stores, and utilities for working with [ERC721](https://docs.openzeppelin.com/contracts/4.x/erc721) NFTs on [EVM-compatible ](https://ethereum.org/en/developers/docs/evm/)blockchains like [Ethereum](https://ethereum.org/en/), [Avalanche](https://www.avax.network/), [Polygon](https://polygon.technology/), [Binance Smart Chain](https://www.bnbchain.org/en/bnb-smart-chain) and more. 
 
 No API is needed, the blockchain is the API!
 
@@ -133,6 +133,9 @@ import { blockchains } from 'vue-evm-nft';
 - **`dahDemoV1Abi`**: ```import { dahDemoV1Abi } from 'vue-evm-nft';``` - The ABI for the first NFT Smart Contract built to use Dig-A-Hash dynamic Meta Data. The Token ID starts at 1, and it uses a classic counter for Token IDs, costs more in gas than more modern versions. This contract supports public mints.
 
 - **`dahNftV2Abi`**: ```import { dahNftV2Abi } from 'vue-evm-nft';``` - The ABI for the 2nd NFT Smart Contract built to use Dig-A-Hash dynamic Meta Data. The Token ID starts at 0, and it does not use counter so it is more gas efficient than the first version.  This contract supports public mints.
+
+### Contract Compatibility
+This package works with standard NFT contracts following OpenZeppelin's [ERC721](https://docs.openzeppelin.com/contracts/4.x/api/token/erc721) specifications. Custom contracts or contracts that deviate from these standards may require additional adjustments.
 
 ## Contributing
 To contribute to this package, please fork the repository and submit a pull request with your changes. Make sure to test your changes locally before opening the pull request by using npm link as described above. PRs will only be merged after substantial local testing by the maintainer.
