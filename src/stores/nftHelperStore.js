@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { useNftStore } from './nftStore';
+import { useNftStore } from 'vue-evm-nft';
 
 const nftStore = useNftStore();
 
@@ -18,7 +18,8 @@ function deriveMetaDataBaseUrl(walletPublicKey, chainId, contractAddress) {
 
 /**
  * This is intended to be customized to create helpers for NFT
- * meta data.
+ * meta data. This file is not referenced in this package because it
+ * is intended to be copied, and pasted into your own Pinia stores folder.
  */
 export const useNftHelperStore = defineStore('nftHelperStore', {
   state: () => ({}),
