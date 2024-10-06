@@ -9,6 +9,7 @@ No API is needed, the blockchain is the API!
 ## Features
 
 - The Web Browser makes calls directly to the blockchain.
+- No Crypto wallet needed.
 - List NFTs with Meta Data, token ID, and Owner.
 - List all NFTs on a contract.
 - List all NFTs on contract, that are held by a specific wallet.
