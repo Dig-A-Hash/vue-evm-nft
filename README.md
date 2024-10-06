@@ -14,7 +14,7 @@ No API is needed, the blockchain is the API!
 - List all NFTs on a contract.
 - List all NFTs on contract, that are held by a specific wallet.
 - Paging through large collections.
-- Sorting by Token ID with toggle.
+- Sorting by Token ID.
 - Local caching with Pinia.
 - More efficient RPC Batch Call support. 
 - Utilities for working with Meta Data structures.
