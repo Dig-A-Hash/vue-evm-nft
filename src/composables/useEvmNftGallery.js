@@ -83,8 +83,7 @@ export function useEvmNftGallery(
   }
 
   /**
-   * Handles getting NFTs and associated Meta Data. This is not callable
-   * from outside this composable.
+   * Handles getting NFTs and associated Meta Data.
    * @param {number} iPage - A page param.
    * @returns - Nothing but sets many internal props.
    */
@@ -129,5 +128,6 @@ export function useEvmNftGallery(
     onToggleSortOrder,
     isLoading,
     nftLoadingMessage,
+    onGetMyNfts,
   };
 }

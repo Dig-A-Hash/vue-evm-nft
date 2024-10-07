@@ -37,7 +37,7 @@ export const blockchains = {
       symbol: 'FTM',
       decimals: 18,
     },
-    publicRpc: 'https://rpc.ankr.com/fantom/',
+    publicRpc: 'https://rpcapi.fantom.network',
   },
   polygon: {
     name: 'Polygon',
@@ -50,11 +50,11 @@ export const blockchains = {
       symbol: 'POL',
       decimals: 18,
     },
-    publicRpc: 'https://polygon-rpc.com',
+    publicRpc: 'https://polygon.llamarpc.com', // Batch size reasonable.
     altPublicRpc: [
-      'https://rpc.ankr.com/polygon',
-      'https://polygon.llamarpc.com',
-      'https://1rpc.io/matic',
+      'https://polygon-rpc.com', // Batch size limit 8.
+      'https://rpc.ankr.com/polygon', // Batch size limit 8.
+      'https://1rpc.io/matic', // Batch size limit 8.
     ],
   },
 };

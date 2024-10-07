@@ -75,14 +75,14 @@ The `useEvmNftGallery` composable is designed to manage and display NFTs stored 
 - **`contractAddress`** (`string`): The address of the NFT contract.
 - **`abi`** (`array`): The contract's ABI (Application Binary Interface).
 - **`chainId`** (`number`): The EVM Chain ID. Pass `null` if using Dig-A-Hash hosted meta data for improved performance when fetching meta data.
-- **`holderPublicKey`** (`string`): (Optional) If provided, fetches NFTs owned by this wallet. If `null`, it will return all NFTs associated with the contract.
+- **`holderPublicKey`** (`string`): (Optional) If provided, fetches NFTs owned by this wallet. If `null`, it will return all NFTs associated with the contract. Warning: If the contract has burned tokens, then passing null here will result in inaccurate counts and listings, the only option for this case is to pass a public Key instead (not null).
 - **`ethersProviderUrl`** (`string`): The URL of the Ethers provider corresponding to the specified chain.
 - **`itemsPerPage`** (`number`): The number of NFTs to display per page.
 - **`nftStoreItemCollectionName`** (`string`): The name of the NFT store collection.
-- **`isAscendingSort`** (`boolean`): Determines the starting sorting order of the NFTs. Set to `true` for ascending order, `false` for descending. use onToggleSortOrder() to change the sort direction.
+- **`isAscendingSort`** (`boolean`): Determines the starting sorting order of the NFTs. Set to `true` for ascending order, `false` for descending. Use onToggleSortOrder() to change the sort direction.
 
-#### Returns and object containing...
-- **`page`**: The current page of NFTs being displayed. Changing page will cause the component to fetch and store the new page of NFTs. If the page has already been fetched, it will not fetch again until page refresh.
+#### Returns an object containing...
+- **`page`**: The current page of NFTs being displayed. Changing page will cause the component to fetch and store the new page of NFTs in Pinia. If the page has already been fetched, it will not fetch again until page refresh.
 - **`numberOfPages`**: The total number of pages based on the number of items and the `itemsPerPage`specified in the params above.
 - **`nfts`**: The current page of NFTs to be displayed.
 - **`isAscending`**: The current sorting order of NFTs.
