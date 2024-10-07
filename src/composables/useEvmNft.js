@@ -38,106 +38,199 @@ export async function useEvmNft(
   contractAddress = contractAddress.toLowerCase();
   const loadingMessage = ref('');
 
+  async function getStartTokenId() {
+    try {
+      await contract.ownerOf(0);
+      return 0;
+    } catch {
+      return 1;
+    }
+  }
+
   /**
-   * Gets a page of NFTs, plus Meta-Data in the specified order.
-   * @param {integer} page - The page number.
-   * @param {boolean} isAscending - True to sort in ascending order, false to sort in descending order.
-   * @returns An object containing the items, pageSize, and a totalCount of all NFTs on this contract.
+   * Retrieves the balance of NFTs for a given holder or the total supply.
+   * If a holder's public key is provided, it fetches the balance of NFTs
+   * owned by that specific holder. If no public key is provided, it
+   * returns the total supply of NFTs.
+   *
+   * @param {string} holderPublicKey - The public key (address) of the NFT
+   * holder. If null, the total supply of NFTs is retrieved.
+   * @returns {Promise<number>} - A Promise that resolves to the balance of
+   * NFTs owned by the holder or the total supply as a number.
+   */
+  async function getBalance(holderPublicKey) {
+    if (holderPublicKey) {
+      holderPublicKey = holderPublicKey.toLowerCase();
+      const balance = await contract.balanceOf(holderPublicKey);
+      return Number(balance);
+    } else {
+      const balance = await contract.totalSupply();
+      return Number(balance);
+    }
+  }
+
+  /**
+   * Calculates the start and end indexes for paginated data retrieval,
+   * adjusted for token balances and direction. This function is used
+   * for determining which subset of tokens to fetch on a specific page.
+   *
+   * @param {number} page - The current page number. Defaults to 1 if not provided.
+   * @param {number} balance - The total number of tokens or items available.
+   * @param {number} pageSize - The number of tokens or items to display per page.
+   * @param {boolean} isAscending - Determines the order of retrieval:
+   *   - `true`: Retrieves items in ascending order.
+   *   - `false`: Retrieves items in descending order.
+   * @param {number} startTokenId - The starting token ID of the contract,
+   * which could be 0 or 1 depending on the contract.
+   * @returns {Object} - An object containing:
+   *   - `startIndex` (number): The index at which to start retrieving tokens.
+   *   - `endIndex` (number): The index at which to end retrieval (inclusive).
+   *   - `lastPage` (number): The total number of pages based on the balance and page size.
+   */
+  function calculatePageIndexes(
+    page,
+    balance,
+    pageSize,
+    isAscending,
+    startTokenId
+  ) {
+    const lastPage = Math.ceil(balance / pageSize);
+    page = page || 1;
+
+    let startIndex, endIndex;
+    if (isAscending) {
+      startIndex = pageSize * (page - 1);
+      endIndex = Math.min(balance, pageSize * page);
+    } else {
+      startIndex = Math.max(0, balance - pageSize * page);
+      endIndex = balance - pageSize * (page - 1);
+    }
+
+    if (startTokenId === 0) {
+      endIndex--;
+    }
+
+    return { startIndex, endIndex, lastPage };
+  }
+
+  /**
+   * Fetches a batch of NFT tokens from the blockchain, including their owners,
+   * within a specified range. This function does not work well with contracts
+   * that have burned tokens. Use fetchUserTokens instead.
+   *
+   * @param {number} startIndex - The starting index for fetching tokens (adjusted
+   * to the token IDs).
+   * @param {number} endIndex - The ending index for fetching tokens.
+   * @param {number} startTokenId - The starting token ID of the contract, which
+   * could be 0 or 1 depending on the contract.
+   * @returns {Promise<Object[]>} - A Promise that resolves to an array of objects,
+   * each containing:
+   *   - `tokenId` (number): The ID of the fetched token.
+   *   - `owner` (string): The address of the token's owner.
+   */
+  async function fetchAllTokens(startIndex, endIndex, startTokenId) {
+    const batchedTokenIdPromises = [];
+
+    // Adjust startIndex to match token IDs for contracts starting at 0 or 1
+    startIndex += startTokenId;
+
+    for (
+      let tokenId = endIndex;
+      tokenId >= startIndex && tokenId >= startTokenId;
+      tokenId--
+    ) {
+      batchedTokenIdPromises.push(
+        contract
+          .ownerOf(tokenId)
+          .then((owner) => ({ tokenId, owner }))
+          .catch((error) => {
+            // Handle invalid token IDs (e.g., tokens that have been burned)
+            if (error.message.includes('invalid token ID')) {
+              console.warn(`Token ID ${tokenId} is invalid or burned.`);
+              return null; // Skip this token
+            }
+            throw error; // Re-throw other unexpected errors
+          })
+      );
+    }
+
+    // Wait for all promises and filter out null values
+    const batchedTokenIds = await Promise.all(batchedTokenIdPromises);
+    return batchedTokenIds.filter((token) => token !== null);
+  }
+
+  /**
+   * Fetches a batch of NFT tokens owned by a specific user from the
+   * blockchain, excluding metadata. This function generates promises
+   * to retrieve token IDs for a user's NFTs, based on a range of indices.
+   * The tokens are fetched using `tokenOfOwnerByIndex`, which is
+   * specific to the holder's address.
+   * @param {number} startIndex - The starting index for fetching tokens (inclusive).
+   * @param {number} endIndex - The ending index for fetching tokens (inclusive).
+   * @param {string} holderPublicKey - The public key (address) of the NFT holder.
+   * @param {number} startTokenId - The starting token ID of the contract, which
+   * could be 0 or 1 depending on the contract.
+   * @returns {Promise<Object[]>} - A Promise that resolves to an array of objects,
+   * each containing:
+   *   - `tokenId` (number): The ID of the fetched token.
+   *   - `owner` (string): The holder's public key.
+   */
+  async function fetchUserTokens(
+    startIndex,
+    endIndex,
+    holderPublicKey,
+    startTokenId
+  ) {
+    const batchedTokenIdPromises = [];
+
+    // Adjust indexes for fetching user's tokens
+    for (let i = endIndex - startTokenId; i >= startIndex; i--) {
+      batchedTokenIdPromises.push(
+        contract
+          .tokenOfOwnerByIndex(holderPublicKey, i)
+          .then((tokenId) => ({
+            tokenId: Number(tokenId),
+            owner: holderPublicKey,
+          }))
+          .catch((error) => {
+            console.error(`Error fetching token at index ${i}:`, error);
+            throw error;
+          })
+      );
+    }
+
+    return Promise.all(batchedTokenIdPromises);
+  }
+
+  /**
+   * Gets NFTs and their Meta Data, with support for paging, and sorting by Token ID.
+   * @param {number} page - The page.
+   * @param {boolean} isAscending - The sort direction.
+   * @returns
    */
   async function getNfts(page, isAscending) {
     loadingMessage.value = 'Connecting to Blockchain...';
-    let startTokenId = 0; // Assume token ID starts at 0 by default
 
-    // Check if token ID 0 exists to determine if the contract starts at 0 or 1
-    try {
-      await contract.ownerOf(0);
-      startTokenId = 0; // Token ID starts at 0
-    } catch (error) {
-      startTokenId = 1; // Token ID starts at 1
-    }
+    const startTokenId = await getStartTokenId();
+    const balance = await getBalance(holderPublicKey);
+    const { startIndex, endIndex, lastPage } = calculatePageIndexes(
+      page,
+      balance,
+      pageSize,
+      isAscending,
+      startTokenId
+    );
 
-    let balance;
-    if (holderPublicKey) {
-      // Get Contract NFT balance for the specified wallet.
-      holderPublicKey = holderPublicKey.toLowerCase();
-      balance = await contract.balanceOf(holderPublicKey);
-      balance = Number(balance);
-    } else {
-      // Get Contract NFT balance for the entire contract.
-      balance = await contract.totalSupply();
-      balance = Number(balance);
-    }
+    // Fetch tokens based on whether a specific wallet is provided or not
+    const batchedTokenIds = holderPublicKey
+      ? await fetchUserTokens(
+          startIndex,
+          endIndex,
+          holderPublicKey,
+          startTokenId
+        )
+      : await fetchAllTokens(startIndex, endIndex, startTokenId);
 
-    // Calculate the last page.
-    const lastPage = Math.ceil(balance / pageSize);
-
-    if (!page) {
-      page = 1;
-    }
-
-    // Calculate the start and end indexes for the current page
-    let startIndex, endIndex;
-
-    if (isAscending) {
-      // Ascending order: Start from the lowest token ID
-      startIndex = pageSize * (page - 1);
-      endIndex = Math.min(balance, pageSize * page);
-
-      // Adjust endIndex if the start tokenId is 0 to avoid overshooting
-      if (startTokenId === 0) {
-        endIndex--;
-      }
-    } else {
-      // Descending order: Start from the highest token ID and go backwards
-      startIndex = Math.max(startTokenId, balance - pageSize * page);
-      endIndex = balance - pageSize * (page - 1);
-
-      // Adjust endIndex if the start tokenId is 0 to avoid overshooting
-      if (startTokenId === 0) {
-        endIndex--;
-      }
-    }
-
-    // Batch fetching token IDs
-    const batchedTokenIdPromises = [];
-
-    if (!holderPublicKey) {
-      // Get all tokens on contract historical.
-      // Adjust condition to ensure both startIndex and endIndex are included.
-      for (
-        let tokenId = endIndex;
-        tokenId >= startIndex && tokenId >= startTokenId;
-        tokenId--
-      ) {
-        batchedTokenIdPromises.push(
-          contract.ownerOf(tokenId).then((owner) => {
-            return { tokenId, owner };
-          })
-        );
-      }
-    } else {
-      // Get tokens for specified wallet.
-      // Ensure correct token ID ranges by adjusting i logic.
-      for (let i = endIndex - 1; i >= startIndex; i--) {
-        batchedTokenIdPromises.push(
-          contract
-            .tokenOfOwnerByIndex(holderPublicKey, i)
-            .then((tokenId) => ({
-              tokenId: Number(tokenId),
-              owner: holderPublicKey,
-            }))
-            .catch((error) => {
-              console.error(`Error fetching token at index ${i}:`, error);
-              throw error;
-            })
-        );
-      }
-    }
-
-    // This will end up being an array of objects with TokenId, and Owner.
-    const batchedTokenIds = await Promise.all(batchedTokenIdPromises);
-
-    // This gets the meta-data and associates the owner and tokenId.
     const tokens = await getMetaDataBatch(batchedTokenIds, isAscending);
 
     return { tokens, pageSize, count: balance };
