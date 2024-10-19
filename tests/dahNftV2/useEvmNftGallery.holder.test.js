@@ -60,7 +60,7 @@ test('should fetch page 2 of NFTs by holder', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts, onGetMyNfts } = useEvmNftGallery(
+        const { nfts, getNftPage } = useEvmNftGallery(
           contractPublicKey,
           contractAddress,
           dahNftV2Abi,
@@ -72,7 +72,7 @@ test('should fetch page 2 of NFTs by holder', async (t) => {
           true
         );
 
-        return { nfts, onGetMyNfts };
+        return { nfts, getNftPage };
       },
       template: suspenseTemplate,
     },
@@ -90,8 +90,8 @@ test('should fetch page 2 of NFTs by holder', async (t) => {
   // Log the initial data for debugging purposes
 
   // Simulate changing the page, assuming there's a method or interaction that triggers the change.
-  // If `onGetMyNfts` is a method to manually trigger page fetching:
-  await wrapper.vm.onGetMyNfts(2);
+  // If `getNftPage` is a method to manually trigger page fetching:
+  await wrapper.vm.getNftPage(2);
 
   // Wait for the new page data to be fetched and processed
   await flushPromises();
