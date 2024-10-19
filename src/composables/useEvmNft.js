@@ -33,12 +33,35 @@ export async function useEvmNft(
   contractABI,
   chainId
 ) {
-  const contract = new ethers.Contract(contractAddress, contractABI, provider);
-  contractOwnerPublicKey = contractOwnerPublicKey.toLowerCase();
-  contractAddress = contractAddress.toLowerCase();
+  let contract = null;
+
+  // Only initialize the contract if both contractAddress and contractABI are provided
+  if (contractAddress && contractABI && provider) {
+    contract = new ethers.Contract(contractAddress, contractABI, provider);
+    contractOwnerPublicKey = contractOwnerPublicKey.toLowerCase();
+    contractAddress = contractAddress.toLowerCase();
+  }
+
   const loadingMessage = ref('');
 
-  async function getStartTokenId() {
+  /**
+   * Validates the contract instance.
+   * @private
+   * @returns Nothing but throws an error if there is no contract.
+   */
+  function _contractRequired() {
+    if (!contract) {
+      throw new Error('Contract is required for getStartTokenId.');
+    }
+  }
+
+  /**
+   * Gets the starting Token ID on the contract.
+   * This is used to tell if the first Token ID is 0 or 1.
+   * @private
+   * @returns Either a 0 or a 1.
+   */
+  async function _getStartTokenId() {
     try {
       await contract.ownerOf(0);
       return 0;
@@ -52,13 +75,13 @@ export async function useEvmNft(
    * If a holder's public key is provided, it fetches the balance of NFTs
    * owned by that specific holder. If no public key is provided, it
    * returns the total supply of NFTs.
-   *
+   * @private
    * @param {string} holderPublicKey - The public key (address) of the NFT
    * holder. If null, the total supply of NFTs is retrieved.
    * @returns {Promise<number>} - A Promise that resolves to the balance of
    * NFTs owned by the holder or the total supply as a number.
    */
-  async function getBalance(holderPublicKey) {
+  async function _getBalance(holderPublicKey) {
     if (holderPublicKey) {
       holderPublicKey = holderPublicKey.toLowerCase();
       const balance = await contract.balanceOf(holderPublicKey);
@@ -73,7 +96,7 @@ export async function useEvmNft(
    * Calculates the start and end indexes for paginated data retrieval,
    * adjusted for token balances and direction. This function is used
    * for determining which subset of tokens to fetch on a specific page.
-   *
+   * @private
    * @param {number} page - The current page number. Defaults to 1 if not provided.
    * @param {number} balance - The total number of tokens or items available.
    * @param {number} pageSize - The number of tokens or items to display per page.
@@ -87,7 +110,7 @@ export async function useEvmNft(
    *   - `endIndex` (number): The index at which to end retrieval (inclusive).
    *   - `lastPage` (number): The total number of pages based on the balance and page size.
    */
-  function calculatePageIndexes(
+  function _calculatePageIndexes(
     page,
     balance,
     pageSize,
@@ -114,10 +137,10 @@ export async function useEvmNft(
   }
 
   /**
-   * Fetches a batch of NFT tokens from the blockchain, including their owners,
+   * Fetches a batch of NFT tokens from the contract, including their owners,
    * within a specified range. This function does not work well with contracts
    * that have burned tokens. Use fetchUserTokens instead.
-   *
+   * @private
    * @param {number} startIndex - The starting index for fetching tokens (adjusted
    * to the token IDs).
    * @param {number} endIndex - The ending index for fetching tokens.
@@ -128,7 +151,7 @@ export async function useEvmNft(
    *   - `tokenId` (number): The ID of the fetched token.
    *   - `owner` (string): The address of the token's owner.
    */
-  async function fetchAllTokens(startIndex, endIndex, startTokenId) {
+  async function _fetchAllTokens(startIndex, endIndex, startTokenId) {
     const batchedTokenIdPromises = [];
 
     // Adjust startIndex to match token IDs for contracts starting at 0 or 1
@@ -161,10 +184,11 @@ export async function useEvmNft(
 
   /**
    * Fetches a batch of NFT tokens owned by a specific user from the
-   * blockchain, excluding metadata. This function generates promises
+   * contract, excluding metadata. This function generates promises
    * to retrieve token IDs for a user's NFTs, based on a range of indices.
    * The tokens are fetched using `tokenOfOwnerByIndex`, which is
    * specific to the holder's address.
+   * @private
    * @param {number} startIndex - The starting index for fetching tokens (inclusive).
    * @param {number} endIndex - The ending index for fetching tokens (inclusive).
    * @param {string} holderPublicKey - The public key (address) of the NFT holder.
@@ -175,7 +199,7 @@ export async function useEvmNft(
    *   - `tokenId` (number): The ID of the fetched token.
    *   - `owner` (string): The holder's public key.
    */
-  async function fetchUserTokens(
+  async function _fetchUserTokens(
     startIndex,
     endIndex,
     holderPublicKey,
@@ -204,16 +228,18 @@ export async function useEvmNft(
 
   /**
    * Gets NFTs and their Meta Data, with support for paging, and sorting by Token ID.
+   * @public
    * @param {number} page - The page.
    * @param {boolean} isAscending - The sort direction.
    * @returns
    */
   async function getNfts(page, isAscending) {
+    _contractRequired();
     loadingMessage.value = 'Connecting to Blockchain...';
 
-    const startTokenId = await getStartTokenId();
-    const balance = await getBalance(holderPublicKey);
-    const { startIndex, endIndex, lastPage } = calculatePageIndexes(
+    const startTokenId = await _getStartTokenId();
+    const balance = await _getBalance(holderPublicKey);
+    const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
       page,
       balance,
       pageSize,
@@ -223,13 +249,13 @@ export async function useEvmNft(
 
     // Fetch tokens based on whether a specific wallet is provided or not
     const batchedTokenIds = holderPublicKey
-      ? await fetchUserTokens(
+      ? await _fetchUserTokens(
           startIndex,
           endIndex,
           holderPublicKey,
           startTokenId
         )
-      : await fetchAllTokens(startIndex, endIndex, startTokenId);
+      : await _fetchAllTokens(startIndex, endIndex, startTokenId);
 
     const tokens = await getMetaDataBatch(batchedTokenIds, isAscending);
 
@@ -239,8 +265,9 @@ export async function useEvmNft(
   /**
    * Prepares and post processes the batched token IDs to assemble meta-data and
    * on chain token IDs and owners.
-   * @param {*} batchedTokenIds
-   * @param {*} isAscending
+   * @public
+   * @param {*} batchedTokenIds - An array of objects with tokenId, and owner props.
+   * @param {*} isAscending - true if is ascending sort order, false for desc.
    * @returns An array of objects containing the tokens and their meta-data.
    */
   async function getMetaDataBatch(batchedTokenIds, isAscending) {
@@ -279,7 +306,8 @@ export async function useEvmNft(
    * Gets the NFT Meta-Data for a list of token IDs. If chainId is not null, then
    * we assume this is a Dig-A-Hash NFT. If chainId is null, then we must run another
    * call to the contract to get the Token URI, which is a tiny bit slower.
-   * @param {array} tokenIds - The token IDs.
+   * @public
+   * @param {array} tokenIds - An array of token IDs.
    * @returns An array of objects containing the token ID, meta-data URL,
    * meta-data, and private data.
    */
@@ -339,10 +367,12 @@ export async function useEvmNft(
 
   /**
    * Gets the owner of a token.
+   * @public
    * @param {*} tokenId - The token ID.
    * @returns A wallet address.
    */
   async function getTokenOwner(tokenId) {
+    _contractRequired();
     try {
       const owner = await contract.ownerOf(tokenId);
       return owner;
