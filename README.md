@@ -50,7 +50,7 @@ import {
   dahDemoV1Abi as abi,
 } from 'vue-evm-nft';
 
-const { page, numberOfPages, nfts, isAscending, onChangeSortOrder } =
+const { page, numberOfPages, nfts, isAscending, toggleSortOrder, getNftPage, getTokenOwner, getTokenMetaData } =
   useEvmNftGallery(
     contractPublicKey,
     contractAddress,
@@ -74,7 +74,7 @@ The `useEvmNftGallery` composable is designed to manage and display NFTs stored 
 - **`contractPublicKey`** (`string`): The public key of the wallet holding the contract.
 - **`contractAddress`** (`string`): The address of the NFT contract.
 - **`abi`** (`array`): The contract's ABI (Application Binary Interface).
-- **`chainId`** (`number`): The EVM Chain ID. Pass `null` if using Dig-A-Hash hosted meta data for improved performance when fetching meta data.
+- **`chainId`** (`number`): The EVM Chain ID. Pass `null` if you are not using Dig-A-Hash meta data, then the composable will get the Meta Dat from the token by making a call to the contract. Pass a chain ID if using Dig-A-Hash hosted meta data for improved performance when fetching meta data.
 - **`holderPublicKey`** (`string`): (Optional) If provided, fetches NFTs owned by this wallet. If `null`, it will return all NFTs associated with the contract. Warning: If the contract has burned tokens, then passing null here will result in inaccurate counts and listings, the only option for this case is to pass a public Key instead (not null).
 - **`ethersProviderUrl`** (`string`): The URL of the Ethers provider corresponding to the specified chain.
 - **`itemsPerPage`** (`number`): The number of NFTs to display per page.
@@ -86,9 +86,12 @@ The `useEvmNftGallery` composable is designed to manage and display NFTs stored 
 - **`numberOfPages`**: The total number of pages based on the number of items and the `itemsPerPage`specified in the params above.
 - **`nfts`**: The current page of NFTs to be displayed.
 - **`isAscending`**: The current sorting order of NFTs.
-- **`onToggleSortOrder`**: A function to toggle or change the sorting order of NFTs.
+- **`toggleSortOrder`**: A function to toggle or change the sorting order of NFTs.
 - **`isLoading`**: A boolean that will indicate whether or not the component is fetching. Create a vue watcher to track changes.
-- **`nftLoadingMessage`**: A string that will indicate exactly what the component is doing while isLoading is true. Create a vue watcher to track changes.
+- **`loadingMessage`**: A string that will indicate exactly what the component is doing while isLoading is true. Create a vue watcher to track changes.
+- **`getNftPage`**: An async function that takes a param indicating which page of NFTs to fetch from the contract.
+- **`getTokenOwner`**: An async function to get the current token holder wallet address.
+- **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
 
 ## useEvmNft
 This is used internally by useEvmNftGallery but it can still be used directly.
