@@ -6,7 +6,7 @@ import { ethers } from 'ethers';
 /**
  * Initializes the NFT Gallery composable exposing several variables and
  * functions needed to sort and page through EVM based NFT Contracts. This
- * component is dependant on the useEvmNft, and useEvmNftStore composables.
+ * component is dependant on the useEvmNft composable, and Pinia nftStore.
  * @param {string} contractPublicKey - The public key of the wallet holding the contract.
  * @param {string} contractAddress - The contract address.
  * @param {array} abi - The contract ABI.
@@ -39,14 +39,18 @@ export function useEvmNftGallery(
   const nfts = ref([]);
   const isAscending = ref(isAscendingSort);
   const isLoading = ref(false);
-  const nftLoadingMessage = ref('');
+  const loadingMessage = ref('');
 
-  // Internal function pointer.
-  let getMyNfts = null;
+  // Proxy functions from useEvmNft.
+  let getMyNfts = function () {};
+  let getTokenOwner = function () {};
+  let getTokenMetaData = function () {};
+  let getMetaDataBatch = function () {};
 
   onMounted(async () => {
     nftStore.addCollection(nftStoreItemCollectionName);
-    const { getNfts, loadingMessage } = await useEvmNft(
+
+    const evmNft = await useEvmNft(
       parseInt(itemsPerPage),
       new ethers.JsonRpcProvider(ethersProviderUrl),
       holderPublicKey,
@@ -56,30 +60,33 @@ export function useEvmNftGallery(
       chainId
     );
 
-    nftLoadingMessage.value = loadingMessage; // bind ref to loadingMessage
+    loadingMessage.value = evmNft.loadingMessage; // bind ref to loadingMessage
 
     // Set the function pointer for calling later, after mount.
-    getMyNfts = getNfts;
+    getMyNfts = evmNft.getNfts;
+    getTokenOwner = evmNft.getTokenOwner;
+    getTokenMetaData = evmNft.getTokenMetaData;
+    getMetaDataBatch = evmNft.getMetaDataBatch;
 
-    await onGetMyNfts(page.value);
+    await getNftPage(page.value);
   });
 
   // Get NFTs if page changes.
   watch(page, async (newPage, oldPage) => {
     if (newPage !== oldPage) {
-      await onGetMyNfts(newPage);
+      await getNftPage(newPage);
     }
   });
 
   /**
    * Handles changing the sort order. Call this from anywhere.
    */
-  async function onToggleSortOrder() {
+  async function toggleSortOrder() {
     isAscending.value = !isAscending.value;
     nftStore.itemCollections[nftStoreItemCollectionName].items = [];
     nftStore.itemCollections[nftStoreItemCollectionName].page = 1;
     page.value = 1;
-    await onGetMyNfts(page.value);
+    await getNftPage(page.value);
   }
 
   /**
@@ -87,7 +94,7 @@ export function useEvmNftGallery(
    * @param {number} iPage - A page param.
    * @returns - Nothing but sets many internal props.
    */
-  async function onGetMyNfts(iPage) {
+  async function getNftPage(iPage) {
     try {
       isLoading.value = true;
       // Skip fetching NFTs if we already have them.
@@ -125,9 +132,12 @@ export function useEvmNftGallery(
     numberOfPages,
     nfts,
     isAscending,
-    onToggleSortOrder,
     isLoading,
-    nftLoadingMessage,
-    onGetMyNfts,
+    loadingMessage,
+    toggleSortOrder,
+    getNftPage,
+    getTokenOwner,
+    getTokenMetaData,
+    getMetaDataBatch,
   };
 }
