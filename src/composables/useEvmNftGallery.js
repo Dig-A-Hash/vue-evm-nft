@@ -18,8 +18,8 @@ import { ethers } from 'ethers';
  * @param {number} itemsPerPage - The number of items to get per page.
  * @param {string} nftStoreItemCollectionName - The NFT Store collection name.
  * @param {boolean} isAscendingSort - Sorting value.
- * @returns page, numberOfPages, nfts, isAscending, onToggleSortOrder,
- * isLoading nftLoadingMessage,
+ * @returns page, numberOfPages, nfts, isAscending, toggleSortOrder,
+ * isLoading loadingMessage, getNftPage, getTokenOwner, getTokenMetaData, getMetaDataBatch
  */
 export function useEvmNftGallery(
   contractPublicKey,
@@ -42,10 +42,10 @@ export function useEvmNftGallery(
   const loadingMessage = ref('');
 
   // Proxy functions from useEvmNft.
-  let getMyNfts = function () {};
-  let getTokenOwner = function () {};
-  let getTokenMetaData = function () {};
-  let getMetaDataBatch = function () {};
+  let _getMyNfts = null;
+  let _getTokenOwner = null;
+  let _getTokenMetaData = null;
+  let _getMetaDataBatch = null;
 
   onMounted(async () => {
     nftStore.addCollection(nftStoreItemCollectionName);
@@ -63,10 +63,10 @@ export function useEvmNftGallery(
     loadingMessage.value = evmNft.loadingMessage; // bind ref to loadingMessage
 
     // Set the function pointer for calling later, after mount.
-    getMyNfts = evmNft.getNfts;
-    getTokenOwner = evmNft.getTokenOwner;
-    getTokenMetaData = evmNft.getTokenMetaData;
-    getMetaDataBatch = evmNft.getMetaDataBatch;
+    _getMyNfts = evmNft.getNfts;
+    _getTokenOwner = evmNft.getTokenOwner;
+    _getTokenMetaData = evmNft.getTokenMetaData;
+    _getMetaDataBatch = evmNft.getMetaDataBatch;
 
     await getNftPage(page.value);
   });
@@ -79,7 +79,9 @@ export function useEvmNftGallery(
   });
 
   /**
-   * Handles changing the sort order. Call this from anywhere.
+   * Toggles the sort order of the NFTs between ascending and descending.
+   * It also clears the current collection and resets pagination to the first page.
+   * @returns {Promise<void>} - A promise for a page of NFTs
    */
   async function toggleSortOrder() {
     isAscending.value = !isAscending.value;
@@ -90,9 +92,10 @@ export function useEvmNftGallery(
   }
 
   /**
-   * Handles getting NFTs and associated Meta Data.
-   * @param {number} iPage - A page param.
-   * @returns - Nothing but sets many internal props.
+   * Fetches a specific page of NFTs and associated metadata.
+   * This function updates the local state with NFTs and their pagination details.
+   * @param {number} iPage - The page number to retrieve.
+   * @returns - A promise that resolves once the NFTs are fetched.
    */
   async function getNftPage(iPage) {
     try {
@@ -108,7 +111,7 @@ export function useEvmNftGallery(
         return;
       }
 
-      const { tokens, pageSize, count } = await getMyNfts(
+      const { tokens, pageSize, count } = await _getMyNfts(
         iPage,
         isAscending.value
       );
@@ -121,10 +124,38 @@ export function useEvmNftGallery(
         nftStore.itemCollections[nftStoreItemCollectionName].page;
       nftStore.itemCollections[nftStoreItemCollectionName].itemCount = count;
     } catch (error) {
+      console.error('Error in getNftPage:', error);
       throw error;
     } finally {
       isLoading.value = false;
     }
+  }
+
+  /**
+   * Fetches the owner of a specific token by its ID. Exposing a proxy function for evmNft.
+   * @param {number} tokenId - The ID of the token to look up the owner for.
+   * @returns {Promise<string>} - A promise that resolves with the owner’s address.
+   */
+  async function getTokenOwner(tokenId) {
+    return await _getTokenOwner(tokenId);
+  }
+
+  /**
+   * Retrieves metadata for a given set of token IDs. Exposing a proxy function for evmNft.
+   * @param {array} tokenIds - An array of token IDs to retrieve metadata for.
+   * @returns {Promise<object>} - A promise that resolves with the metadata for the tokens.
+   */
+  async function getTokenMetaData(tokenIds) {
+    return await _getTokenMetaData(tokenIds);
+  }
+
+  /**
+   * Retrieves metadata for a batch of tokens. Exposing a proxy function for evmNft.
+   * @param {array} batchObjects - Array of batch objects, each containing details for multiple tokens.
+   * @returns {Promise<object>} - A promise that resolves with the metadata for the batch of tokens.
+   */
+  async function getMetaDataBatch(batchObjects) {
+    return await _getMetaDataBatch(batchObjects);
   }
 
   return {
