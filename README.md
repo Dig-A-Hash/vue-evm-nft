@@ -64,9 +64,7 @@ const { page, numberOfPages, nfts, isAscending, toggleSortOrder, getNftPage, get
   );
 ```
 
-## Composables
-
-### useEvmNftGallery
+## useEvmNftGallery
 
 The `useEvmNftGallery` composable is designed to manage and display NFTs stored in EVM-based contracts. It allows sorting and pagination through NFTs while leveraging other composables (`useEvmNft` and `useEvmNftStore`) for local caching and enhanced functionality.
 
@@ -81,7 +79,7 @@ The `useEvmNftGallery` composable is designed to manage and display NFTs stored 
 - **`nftStoreItemCollectionName`** (`string`): The name of the NFT store collection.
 - **`isAscendingSort`** (`boolean`): Determines the starting sorting order of the NFTs. Set to `true` for ascending order, `false` for descending. Use onToggleSortOrder() to change the sort direction.
 
-#### Returns an object containing...
+#### Returns an object containing:
 - **`page`**: The current page of NFTs being displayed. Changing page will cause the component to fetch and store the new page of NFTs in Pinia. If the page has already been fetched, it will not fetch again until page refresh.
 - **`numberOfPages`**: The total number of pages based on the number of items and the `itemsPerPage`specified in the params above.
 - **`nfts`**: The current page of NFTs to be displayed.
@@ -94,22 +92,114 @@ The `useEvmNftGallery` composable is designed to manage and display NFTs stored 
 - **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
 
 ## useEvmNft
-This is used internally by useEvmNftGallery but it can still be used directly.
+This is used internally by useEvmNftGallery but it can still be used directly. The useEvmNft composable fetches NFT data from an ERC721 contract and retrieves metadata either directly from the blockchain or via the Dig-A-Hash storage pattern. It supports pagination, sorting, and retrieving the current owner of a token.
 
-```
-import { useEvmNft } from 'vue-evm-nft';
-```
+- **`pageSize`** (`number`): The number of NFTs to display per page.
+- **`provider`** (`object`): The `ethers.js` provider instance.
+- **`holderPublicKey`** (`string`): The public key of the NFT holder. Set to `null` to retrieve all NFTs on the contract.
+- **`contractOwnerPublicKey`** (`string`): The public key of the contract owner.
+- **`contractAddress`** (`string`): The contract address.
+- **`contractABI`** (`array`): The ABI (Application Binary Interface) of the contract.
+- **`chainId`** (`number`): The chain ID. Pass `null` if the metadata is not stored in the Dig-A-Hash pattern.
+- **`excludeWallet`** (`string`): (Optional) The wallet to exclude from the list of NFTs.
 
- Docs go here.
+#### Returns an object containing:
+- **`getNfts`** (`function`): Fetches NFTs based on the current page, pagination size, and sorting order.
+- **`getTokenOwner`** (`function`): Retrieves the owner of a specific NFT.
+- **`getMetaDataBatch`** (`function`): Retrieves metadata for a batch of NFTs.
+- **`getTokenMetaData`** (`function`): Retrieves metadata for specific token IDs.
+- **`loadingMessage`** (`ref`): A reactive reference to track the loading status message.
+
+#### Example Usage
+
+```javascript
+import { useEvmNft, blockchains, dahNftV2Abi } from 'vue-evm-nft';
+
+const { getNfts, getTokenOwner, loadingMessage } = useEvmNft(
+  10, // pageSize
+  blockchains.fantom.publicRpc, // ethers.js provider
+  null, // holderPublicKey
+  '0xOwnerPublicKey', // contractOwnerPublicKey
+  '0xContractAddress', // contractAddress
+  dahNftV2Abi, // contractABI
+  1 // chainId (if applicable)
+);
+
+const loadNFTs = async () => {
+  const nfts = await getNfts(1, true); // Fetches the first page in ascending order
+  console.log(nfts);
+};
+```
 
 ## useNftStore
-This is the Pinia store used internally by useEvmNftGallery but it can still be used directly. 
+This Pinia store used internally by useEvmNftGallery but it can still be used directly. The `useNftStore` is a Pinia store used to manage collections of NFTs, their metadata, and associated image URLs. It allows for efficient retrieval and management of NFT attributes, including safe handling of different image sizes. 
 
-```
+#### State
+- **`itemCollections`** (`object`): Stores NFT collections. Each collection is keyed by its name and contains the following properties:
+  - **`items`** (`array`): An array of NFTs for each page.
+  - **`itemCount`** (`number`): The total number of items in the collection.
+  - **`page`** (`number`): The current page of items being viewed.
+
+#### Getters
+- **`getNftUrl`** (`function`): Generates the URL for viewing an NFT on the website.
+  - **Parameters**:
+    - `tokenId` (`string`): The NFT's token ID.
+    - `path` (`string`): The base path for the NFT page.
+  - **Returns**: A URL string for the NFT.
+
+- **`getImageLarge`** (`function`): Retrieves a large version of the NFT image if available, otherwise defaults to the NFT's standard image.
+  - **Parameters**:
+    - `metaData` (`object`): The NFT's metadata object.
+  - **Returns**: The URL of the large image or the default image.
+
+- **`getImageMedium`** (`function`): Retrieves a medium version of the NFT image if available, otherwise defaults to the NFT's standard image.
+  - **Parameters**:
+    - `metaData` (`object`): The NFT's metadata object.
+  - **Returns**: The URL of the medium image or the default image.
+
+- **`getPublicAttributeValue`** (`function`): Retrieves a specific attribute from the NFT's public metadata.
+  - **Parameters**:
+    - `metaData` (`object`): The NFT's metadata object.
+    - `attributeName` (`string`): The name of the attribute to retrieve.
+  - **Returns**: The value of the specified attribute or `null` if not found.
+
+#### Actions
+- **`setCollectionItems`** (`function`): Adds or updates items in a specific collection for a given page.
+  - **Parameters**:
+    - `page` (`number`): The page number to set.
+    - `items` (`array`): The items to be added to the collection.
+    - `collectionName` (`string`): The name of the collection.
+
+- **`addCollection`** (`function`): Adds a new collection to the store.
+  - **Parameters**:
+    - `collectionName` (`string`): The name of the collection to add.
+
+- **`removeCollection`** (`function`): Removes a collection from the store.
+  - **Parameters**:
+    - `collectionName` (`string`): The name of the collection to remove.
+
+#### Example Usage
+
+```javascript
 import { useNftStore } from 'vue-evm-nft';
-```
 
-Docs go here.
+const nftStore = useNftStore();
+
+// Add a new collection
+nftStore.addCollection('myCollection');
+
+// Set items for page 1 in the 'myCollection' collection
+nftStore.setCollectionItems(1, [{ tokenId: 1, metaData: {} }], 'myCollection');
+
+// Retrieve a large image URL for an NFT
+const largeImageUrl = nftStore.getImageLarge(nft.metaData);
+
+// Get a specific public attribute value from the NFT metadata
+const attributeValue = nftStore.getPublicAttributeValue(nft.metaData, 'rarity');
+
+// Remove a collection
+nftStore.removeCollection('myCollection');
+```
 
 ## src/stores/nftHelperStore.js
 This is a Pinia store that you can copy and place into the Pinia stores folder in your project, so this file cannot be imported. This file shows lots of good examples on how to create shortcut/helpers to the various bits of meta data attributes. This is a good way to extend the nftStore described above.
