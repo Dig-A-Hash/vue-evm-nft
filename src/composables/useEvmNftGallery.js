@@ -17,7 +17,7 @@ import { ethers } from 'ethers';
  * @param {string} ethersProviderUrl - The Ethers provider for the Chain ID.
  * @param {number} itemsPerPage - The number of items to get per page.
  * @param {string} nftStoreItemCollectionName - The NFT Store collection name.
- * @param {boolean} isAscendingSort - Sorting value.
+ * @param {boolean} isAscendingSort - Sorting by Token ID direction.
  * @returns page, numberOfPages, nfts, isAscending, toggleSortOrder,
  * isLoading loadingMessage, getNftPage, getTokenOwner, getTokenMetaData, getMetaDataBatch
  */
