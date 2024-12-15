@@ -1,0 +1,10 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",       // Use ES2015 or higher
+    "module": "ESNext",       // Use a modern module system
+    "moduleResolution": "Node",
+    "strict": true,
+    "skipLibCheck": true,     // Skip type-checking in `node_modules`
+    "esModuleInterop": true
+  }
+}

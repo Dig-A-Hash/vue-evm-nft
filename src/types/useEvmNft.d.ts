@@ -1,5 +1,6 @@
 import { Ref } from 'vue';
 import { ethers } from 'ethers';
+import { NftMetaData } from './useNftStore';
 
 /**
  * Composable for interacting with EVM-based NFT contracts.
@@ -35,7 +36,7 @@ export declare function useEvmNft(
   ) => Promise<{
     tokens: Array<{
       tokenId: number;
-      metaData: object | null;
+      metaData: NftMetaData | null;
       metaDataUrl: string;
       owner: string | null;
       privateData: object | null;
@@ -58,7 +59,7 @@ export declare function useEvmNft(
     Array<{
       tokenId: number;
       metaDataUrl: string;
-      metaData: object | null;
+      metaData: NftMetaData | null;
       privateData: object | null;
       owner: string | null;
     }>
@@ -74,7 +75,7 @@ export declare function useEvmNft(
     Array<{
       tokenId: number;
       metaDataUrl: string;
-      metaData: object | null;
+      metaData: NftMetaData | null;
       privateData: object | null;
     }>
   >;

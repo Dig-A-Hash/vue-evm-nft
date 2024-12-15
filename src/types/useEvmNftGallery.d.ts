@@ -1,4 +1,5 @@
-import { Ref } from 'vue';
+import { type ref, Ref } from 'vue';
+import { NftMetaData } from './useNftStore';
 
 export declare function useEvmNftGallery(
   contractPublicKey: string,
@@ -11,12 +12,12 @@ export declare function useEvmNftGallery(
   nftStoreItemCollectionName: string,
   isAscendingSort: boolean
 ): {
-  page: Ref<number>;
-  numberOfPages: Ref<number>;
-  nfts: Ref<any[]>;
-  isAscending: Ref<boolean>;
-  isLoading: Ref<boolean>;
-  loadingMessage: Ref<string>;
+  page: ref<number>;
+  numberOfPages: ref<number>;
+  nfts: ref<NftMetaData[]>;
+  isAscending: ref<boolean>;
+  isLoading: ref<boolean>;
+  loadingMessage: ref<string>;
   toggleSortOrder: () => Promise<void>;
   getNftPage: (iPage: number) => Promise<void>;
   getTokenOwner: (tokenId: number) => Promise<string>;

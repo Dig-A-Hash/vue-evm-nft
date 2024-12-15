@@ -7,6 +7,7 @@ interface MetaDataAttribute {
 
 export interface NftMetaData {
   image?: string;
+  name: string;
   attributes?: MetaDataAttribute[];
 }
 
@@ -39,7 +40,7 @@ export interface NftStoreGetters {
   /**
    * Gets a public attribute value from the NFT metadata.
    */
-  getPublicAttributeValue: (
+  getPublicAttributeValue: () => (
     metaData: NftMetaData,
     attributeName: string
   ) => string | null;
