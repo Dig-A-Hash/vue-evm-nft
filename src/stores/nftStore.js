@@ -6,7 +6,7 @@ import { defineStore } from 'pinia';
  * get smaller versions of the original image from meta-data
  * attributes.
  * @param {object} metaData - The NFT meta-data.
- * @param {object} propertyName - The NFT meta-data property name.
+ * @param {string} propertyName - The NFT meta-data property name.
  * @returns A value from the meta-data.
  */
 function metaDataAttributeValueOrImage(metaData, propertyName) {
