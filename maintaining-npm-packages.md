@@ -1,6 +1,9 @@
 # Maintaining NPM Packages
 If you're developing this package and need to test it in another project without publishing it to npm, you can use npm link to create a symbolic link between your local package and the consuming project. This allows you to test changes in real-time.
 
+### Local Reference
+"vue-evm-nft": "file:../../../Dig-A-Hash/code/vue-evm-nft"
+
 ### Steps to Link Locally
 Navigate to the root directory of your package (this repository):
 
