@@ -382,11 +382,57 @@ export async function useEvmNft(
     }
   }
 
+  /**
+   * Retrieves and paginates NFT metadata based on the contract's token balance and configuration. This method optimizes performance by avoiding direct blockchain queries for token IDs, instead calculating them directly. If a chain ID is specified, this function will be extra fast because it can use Dig-A-Hash predictable meta data.
+   *
+   * @param {number} page - The page number for pagination. Defaults to 1 if not provided.
+   * @param {boolean} isAscending - If true, sorts tokens in ascending order by token ID; if false, descending order.
+   * @returns {Promise<Object>} An object containing: {Array} tokens - An array of objects where each object includes token metadata, and token ID.
+   *   - {number} pageSize - The size of each page (number of items per page).
+   *   - {number} count - The total number of tokens or NFTs for the specified contract.
+   * @throws {Error} If the contract instance has not been initialized.
+   */
+  async function getMetaDataCollection(page, isAscending) {
+    _contractRequired();
+    loadingMessage.value = 'Connecting to Blockchain...';
+
+    const startTokenId = await _getStartTokenId();
+    const balance = await _getBalance(holderPublicKey);
+    const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
+      page,
+      balance,
+      pageSize,
+      isAscending,
+      startTokenId
+    );
+
+    const tokenIds = Array.from(
+      // Create an array with 'balance' items
+      { length: balance },
+      // For each item, give it a value starting from 'startTokenId'
+      (_, index) => startTokenId + index
+    )
+      // Only keep the items from 'startIndex' to 'endIndex'
+      .slice(startIndex, endIndex);
+
+    const tokens = await getTokenMetaData(tokenIds);
+
+    // Ensure we sort
+    if (isAscending) {
+      tokens.sort((a, b) => a.tokenId - b.tokenId);
+    } else {
+      tokens.sort((a, b) => b.tokenId - a.tokenId);
+    }
+
+    return { tokens, pageSize, count: balance };
+  }
+
   return {
     getNfts,
     getTokenOwner,
     getMetaDataBatch,
     getTokenMetaData,
     loadingMessage,
+    getMetaDataCollection,
   };
 }
