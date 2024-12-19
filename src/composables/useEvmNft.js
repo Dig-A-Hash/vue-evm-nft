@@ -110,13 +110,7 @@ export async function useEvmNft(
    *   - `endIndex` (number): The index at which to end retrieval (inclusive).
    *   - `lastPage` (number): The total number of pages based on the balance and page size.
    */
-  function _calculatePageIndexes(
-    page,
-    balance,
-    pageSize,
-    isAscending,
-    startTokenId
-  ) {
+  function _calculatePageIndexes(page, balance, isAscending, startTokenId) {
     const lastPage = Math.ceil(balance / pageSize);
     page = page || 1;
 
@@ -242,7 +236,6 @@ export async function useEvmNft(
     const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
       page,
       balance,
-      pageSize,
       isAscending,
       startTokenId
     );
@@ -401,7 +394,6 @@ export async function useEvmNft(
     const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
       page,
       balance,
-      pageSize,
       isAscending,
       startTokenId
     );

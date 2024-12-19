@@ -1,13 +1,15 @@
 import { StoreDefinition } from 'pinia';
 
 interface MetaDataAttribute {
-  trait_type?: string;
-  value?: string;
+  trait_type: string;
+  value: string;
 }
 
 export interface NftMetaData {
-  image?: string;
+  image: string;
   name: string;
+  tokenId?: number;
+  description: string;
   attributes?: MetaDataAttribute[];
 }
 
