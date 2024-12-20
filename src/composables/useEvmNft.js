@@ -34,6 +34,8 @@ export async function useEvmNft(
   chainId
 ) {
   let contract = null;
+  const _balance = ref(-1);
+  const _startTokenId = ref(-1);
 
   // Only initialize the contract if both contractAddress and contractABI are provided
   if (contractAddress && contractABI && provider) {
@@ -51,27 +53,33 @@ export async function useEvmNft(
    */
   function _contractRequired() {
     if (!contract) {
-      throw new Error('Contract is required for getStartTokenId.');
+      throw new Error('Contract is required for useEvmNft.');
     }
   }
 
   /**
-   * Gets the starting Token ID on the contract.
+   * Sets the starting Token ID on the contract.
    * This is used to tell if the first Token ID is 0 or 1.
    * @private
    * @returns Either a 0 or a 1.
    */
-  async function _getStartTokenId() {
+  async function _setStartTokenId() {
     try {
+      if (_startTokenId.value > -1) {
+        return;
+      }
+
       await contract.ownerOf(0);
-      return 0;
+      _startTokenId.value = 0;
+      // return 0;
     } catch {
-      return 1;
+      _startTokenId.value = 1;
+      // return 1;
     }
   }
 
   /**
-   * Retrieves the balance of NFTs for a given holder or the total supply.
+   * Sets the balance of NFTs for a given holder or the total supply.
    * If a holder's public key is provided, it fetches the balance of NFTs
    * owned by that specific holder. If no public key is provided, it
    * returns the total supply of NFTs.
@@ -81,14 +89,20 @@ export async function useEvmNft(
    * @returns {Promise<number>} - A Promise that resolves to the balance of
    * NFTs owned by the holder or the total supply as a number.
    */
-  async function _getBalance(holderPublicKey) {
-    if (holderPublicKey) {
-      holderPublicKey = holderPublicKey.toLowerCase();
-      const balance = await contract.balanceOf(holderPublicKey);
-      return Number(balance);
+  async function _setBalance(holderPublicKey) {
+    if (_balance.value > -1) {
+      return;
     } else {
-      const balance = await contract.totalSupply();
-      return Number(balance);
+      if (holderPublicKey) {
+        holderPublicKey = holderPublicKey.toLowerCase();
+        const balance = await contract.balanceOf(holderPublicKey);
+        // return Number(balance);
+        _balance.value = Number(balance);
+      } else {
+        const balance = await contract.totalSupply();
+        _balance.value = Number(balance);
+        // return Number(balance);
+      }
     }
   }
 
@@ -103,14 +117,12 @@ export async function useEvmNft(
    * @param {boolean} isAscending - Determines the order of retrieval:
    *   - `true`: Retrieves items in ascending order.
    *   - `false`: Retrieves items in descending order.
-   * @param {number} startTokenId - The starting token ID of the contract,
-   * which could be 0 or 1 depending on the contract.
    * @returns {Object} - An object containing:
    *   - `startIndex` (number): The index at which to start retrieving tokens.
    *   - `endIndex` (number): The index at which to end retrieval (inclusive).
    *   - `lastPage` (number): The total number of pages based on the balance and page size.
    */
-  function _calculatePageIndexes(page, balance, isAscending, startTokenId) {
+  function _calculatePageIndexes(page, balance, isAscending) {
     const lastPage = Math.ceil(balance / pageSize);
     page = page || 1;
 
@@ -123,7 +135,7 @@ export async function useEvmNft(
       endIndex = balance - pageSize * (page - 1);
     }
 
-    if (startTokenId === 0) {
+    if (_startTokenId.value === 0) {
       endIndex--;
     }
 
@@ -186,23 +198,16 @@ export async function useEvmNft(
    * @param {number} startIndex - The starting index for fetching tokens (inclusive).
    * @param {number} endIndex - The ending index for fetching tokens (inclusive).
    * @param {string} holderPublicKey - The public key (address) of the NFT holder.
-   * @param {number} startTokenId - The starting token ID of the contract, which
-   * could be 0 or 1 depending on the contract.
    * @returns {Promise<Object[]>} - A Promise that resolves to an array of objects,
    * each containing:
    *   - `tokenId` (number): The ID of the fetched token.
    *   - `owner` (string): The holder's public key.
    */
-  async function _fetchUserTokens(
-    startIndex,
-    endIndex,
-    holderPublicKey,
-    startTokenId
-  ) {
+  async function _fetchUserTokens(startIndex, endIndex, holderPublicKey) {
     const batchedTokenIdPromises = [];
 
     // Adjust indexes for fetching user's tokens
-    for (let i = endIndex - startTokenId; i >= startIndex; i--) {
+    for (let i = endIndex - _startTokenId.value; i >= startIndex; i--) {
       batchedTokenIdPromises.push(
         contract
           .tokenOfOwnerByIndex(holderPublicKey, i)
@@ -231,28 +236,23 @@ export async function useEvmNft(
     _contractRequired();
     loadingMessage.value = 'Connecting to Blockchain...';
 
-    const startTokenId = await _getStartTokenId();
-    const balance = await _getBalance(holderPublicKey);
+    await _setStartTokenId();
+    await _setBalance(holderPublicKey);
     const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
       page,
-      balance,
+      _balance.value,
       isAscending,
       startTokenId
     );
 
     // Fetch tokens based on whether a specific wallet is provided or not
     const batchedTokenIds = holderPublicKey
-      ? await _fetchUserTokens(
-          startIndex,
-          endIndex,
-          holderPublicKey,
-          startTokenId
-        )
+      ? await _fetchUserTokens(startIndex, endIndex, holderPublicKey)
       : await _fetchAllTokens(startIndex, endIndex, startTokenId);
 
     const tokens = await getMetaDataBatch(batchedTokenIds, isAscending);
 
-    return { tokens, pageSize, count: balance };
+    return { tokens, pageSize, count: _balance.value };
   }
 
   /**
@@ -389,20 +389,19 @@ export async function useEvmNft(
     _contractRequired();
     loadingMessage.value = 'Connecting to Blockchain...';
 
-    const startTokenId = await _getStartTokenId();
-    const balance = await _getBalance(holderPublicKey);
+    await _setStartTokenId();
+    await _setBalance(holderPublicKey);
     const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
       page,
-      balance,
-      isAscending,
-      startTokenId
+      _balance.value,
+      isAscending
     );
 
     const tokenIds = Array.from(
       // Create an array with 'balance' items
-      { length: balance },
+      { length: _balance.value },
       // For each item, give it a value starting from 'startTokenId'
-      (_, index) => startTokenId + index
+      (_, index) => _startTokenId.value + index
     )
       // Only keep the items from 'startIndex' to 'endIndex'
       .slice(startIndex, endIndex);
@@ -416,7 +415,7 @@ export async function useEvmNft(
       tokens.sort((a, b) => b.tokenId - a.tokenId);
     }
 
-    return { tokens, pageSize, count: balance };
+    return { tokens, pageSize, count: _balance.value };
   }
 
   return {
