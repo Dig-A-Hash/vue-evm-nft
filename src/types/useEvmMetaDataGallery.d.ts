@@ -10,7 +10,8 @@ export declare function useEvmMetaDataGallery(
   ethersProviderUrl: string,
   itemsPerPage: number,
   nftStoreItemCollectionName: string,
-  isAscendingSort: boolean
+  isAscendingSort: boolean,
+  isGetAllNftQuery: boolean
 ): {
   page: ref<number>;
   numberOfPages: ref<number>;

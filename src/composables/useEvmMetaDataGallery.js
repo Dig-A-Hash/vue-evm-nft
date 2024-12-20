@@ -18,6 +18,7 @@ import { ethers } from 'ethers';
  * @param {number} itemsPerPage - The number of items to get per page.
  * @param {string} nftStoreItemCollectionName - The NFT Store collection name.
  * @param {boolean} isAscendingSort - Sorting by Token ID direction.
+ * @param {boolean} isGetAllNftQuery - If true, fetches all NFTs in one query.
  * @returns page, numberOfPages, nfts, isAscending, toggleSortOrder,
  * isLoading loadingMessage, getNftPage, getTokenOwner, getTokenMetaData, getMetaDataBatch
  */
@@ -30,7 +31,8 @@ export function useEvmMetaDataGallery(
   ethersProviderUrl,
   itemsPerPage,
   nftStoreItemCollectionName,
-  isAscendingSort
+  isAscendingSort,
+  isGetAllNftQuery
 ) {
   const nftStore = useNftStore();
 
@@ -68,7 +70,11 @@ export function useEvmMetaDataGallery(
     _getTokenMetaData = evmNft.getTokenMetaData;
     _getMetaDataBatch = evmNft.getMetaDataBatch;
 
-    await getNftPage(page.value);
+    if (isGetAllNftQuery) {
+      await getAllNfts();
+    } else {
+      await getNftPage(page.value);
+    }
   });
 
   // Get NFTs if page changes.
@@ -115,8 +121,18 @@ export function useEvmMetaDataGallery(
         iPage,
         isAscending.value
       );
-      nfts.value = tokens;
-      nftStore.setCollectionItems(iPage, tokens, nftStoreItemCollectionName);
+      // append tokens if isGetAllNftQuery is true
+      if (isGetAllNftQuery) {
+        nfts.value = nfts.value.concat(tokens);
+      } else {
+        nfts.value = tokens;
+      }
+
+      nftStore.setCollectionItems(
+        iPage,
+        nfts.value, // used to be tokens, just need the appended items
+        nftStoreItemCollectionName
+      );
       nftStore.itemCollections[nftStoreItemCollectionName].page = Math.ceil(
         count / pageSize
       );
@@ -125,6 +141,25 @@ export function useEvmMetaDataGallery(
       nftStore.itemCollections[nftStoreItemCollectionName].itemCount = count;
     } catch (error) {
       console.error('Error in getNftPage:', error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
+   * Fetches all NFTs and associated metadata for a given contract in a loop
+   * with no paging.
+   */
+  async function getAllNfts() {
+    try {
+      isLoading.value = true;
+      await getNftPage(1);
+      for (let i = 2; i <= numberOfPages.value; i++) {
+        await getNftPage(i);
+      }
+    } catch (error) {
+      console.error('Error in getAllNfts:', error);
       throw error;
     } finally {
       isLoading.value = false;
