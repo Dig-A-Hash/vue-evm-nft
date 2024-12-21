@@ -9,7 +9,7 @@ let contractPublicKey = '0xcbb2a9868d73f24c056893131b97a69ffd36eba9'; // DAH
 let contractAddress = '0x33f1cdD52e7ec6F65Ab93dD518c1e2EdB3a8Dd63'; // DAH - Roadmap
 let chainId = blockchains.avalanche.chainId;
 let itemsPerPage = 5;
-let nftStoreCollectionName = 'nftSmartContract1';
+let nftStoreItemCollectionName = 'nftSmartContract1';
 const suspenseTemplate = '<Suspense><div></div></Suspense>';
 
 test.beforeEach(() => {
@@ -20,17 +20,17 @@ test('should fetch page 1 of all NFTs on contract', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts } = useEvmNftGallery(
+        const { nfts } = useEvmNftGallery({
           contractPublicKey,
           contractAddress,
-          dahDemoV1Abi,
+          abi: dahDemoV1Abi,
           chainId,
-          null,
-          blockchains.avalanche.publicRpc,
+          holderPublicKey: null,
+          rpc: blockchains.avalanche.publicRpc,
           itemsPerPage,
-          nftStoreCollectionName,
-          true
-        );
+          nftStoreItemCollectionName,
+          isAscendingSort: true,
+        });
         return { nfts };
       },
       template: suspenseTemplate,
@@ -61,17 +61,17 @@ test('should fetch page 2 of all NFTs on contract', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts, getNftPage } = useEvmNftGallery(
+        const { nfts, getNftPage } = useEvmNftGallery({
           contractPublicKey,
           contractAddress,
-          dahDemoV1Abi,
+          abi: dahDemoV1Abi,
           chainId,
-          null,
-          blockchains.avalanche.publicRpc,
+          holderPublicKey: null,
+          rpc: blockchains.avalanche.publicRpc,
           itemsPerPage,
-          nftStoreCollectionName,
-          true
-        );
+          nftStoreItemCollectionName,
+          isAscendingSort: true,
+        });
 
         return { nfts, getNftPage };
       },
@@ -118,17 +118,17 @@ test('should fetch page 1 of all NFTs on contract in desc order', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts } = useEvmNftGallery(
-          '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4', // Dog plex
-          '0x9c870E5B8724Db43E58Cd62C424E3071A3FB66E9', // Dog plex - dog show
-          dahDemoV1Abi,
-          blockchains.fantom.chainId,
-          null,
-          blockchains.fantom.publicRpc,
-          24,
-          'a1',
-          false
-        );
+        const { nfts } = useEvmNftGallery({
+          contractPublicKey: '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4', // Dog plex
+          contractAddress: '0x9c870E5B8724Db43E58Cd62C424E3071A3FB66E9', // Dog plex - dog show
+          abi: dahDemoV1Abi,
+          chainId: blockchains.fantom.chainId,
+          holderPublicKey: null,
+          chainId: blockchains.fantom.publicRpc,
+          itemsPerPage: 24,
+          nftStoreItemCollectionName: 'a1',
+          isAscendingSort: false,
+        });
         return { nfts };
       },
       template: suspenseTemplate,
@@ -160,17 +160,17 @@ test.only('should fetch page 1 of all NFTs on contract with burned NFTs', async 
   const wrapper = mount(
     {
       setup() {
-        const { nfts } = useEvmNftGallery(
-          '0x5e44cEFFBeCaeCC0D75b3Be756d40726CE310608', // Urbanhomestead
-          '0x186EE2C8D81183b6bB06368413bc03ed5aa8eF21', // Urbanhomestead - Products
-          dahDemoV1Abi,
-          blockchains.avalanche.chainId,
-          null,
-          blockchains.avalanche.publicRpc,
-          24,
-          'a1',
-          false
-        );
+        const { nfts } = useEvmNftGallery({
+          contractPublicKey: '0x5e44cEFFBeCaeCC0D75b3Be756d40726CE310608', // Urbanhomestead
+          contractAddress: '0x186EE2C8D81183b6bB06368413bc03ed5aa8eF21', // Urbanhomestead - Products
+          abi: dahDemoV1Abi,
+          chainId: blockchains.avalanche.chainId,
+          holderPublicKey: null,
+          rpc: blockchains.avalanche.publicRpc,
+          itemsPerPage: 24,
+          nftStoreItemCollectionName: 'a1',
+          isAscendingSort: false,
+        });
         return { nfts };
       },
       template: suspenseTemplate,

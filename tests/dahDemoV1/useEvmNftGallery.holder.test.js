@@ -9,7 +9,7 @@ let contractPublicKey = '0xcbb2a9868d73f24c056893131b97a69ffd36eba9';
 let contractAddress = '0x33f1cdD52e7ec6F65Ab93dD518c1e2EdB3a8Dd63';
 let chainId = blockchains.avalanche.chainId;
 let itemsPerPage = 5;
-let nftStoreCollectionName = 'nftSmartContract1';
+let nftStoreItemCollectionName = 'nftSmartContract1';
 const suspenseTemplate = '<Suspense><div></div></Suspense>';
 
 test.beforeEach(() => {
@@ -20,17 +20,17 @@ test('should fetch page 1 of NFTs by holder', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts } = useEvmNftGallery(
+        const { nfts } = useEvmNftGallery({
           contractPublicKey,
           contractAddress,
-          dahDemoV1Abi,
+          abi: dahDemoV1Abi,
           chainId,
           contractPublicKey,
-          blockchains.avalanche.publicRpc,
+          rpc: blockchains.avalanche.publicRpc,
           itemsPerPage,
-          nftStoreCollectionName,
-          true
-        );
+          nftStoreItemCollectionName,
+          isAscendingSort: true,
+        });
         return { nfts };
       },
       template: suspenseTemplate,
@@ -60,17 +60,17 @@ test('should fetch page 2 of NFTs by holder', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts, getNftPage } = useEvmNftGallery(
+        const { nfts, getNftPage } = useEvmNftGallery({
           contractPublicKey,
           contractAddress,
-          dahDemoV1Abi,
+          abi: dahDemoV1Abi,
           chainId,
           contractPublicKey,
-          blockchains.avalanche.publicRpc,
+          rpc: blockchains.avalanche.publicRpc,
           itemsPerPage,
-          nftStoreCollectionName,
-          true
-        );
+          nftStoreItemCollectionName,
+          isAscendingSort: true,
+        });
 
         return { nfts, getNftPage };
       },
@@ -113,17 +113,17 @@ test('should fetch page 1 of all NFTs on contract in desc order', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts } = useEvmNftGallery(
-          '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4',
-          '0x9c870E5B8724Db43E58Cd62C424E3071A3FB66E9',
-          dahDemoV1Abi,
-          blockchains.fantom.chainId,
-          '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4',
-          blockchains.fantom.publicRpc,
-          24,
-          'a1',
-          false
-        );
+        const { nfts } = useEvmNftGallery({
+          contractPublicKey: '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4',
+          contractAddress: '0x9c870E5B8724Db43E58Cd62C424E3071A3FB66E9',
+          abi: dahDemoV1Abi,
+          chainId: blockchains.fantom.chainId,
+          holderPublicKey: '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4',
+          rpc: blockchains.fantom.publicRpc,
+          itemsPerPage: 24,
+          nftStoreItemCollectionName: 'a1',
+          isAscendingSort: false,
+        });
         return { nfts };
       },
       template: suspenseTemplate,
