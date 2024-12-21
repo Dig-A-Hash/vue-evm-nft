@@ -3,8 +3,8 @@ export const blockchains = {
     chainId: 43114,
     name: 'Avalanche',
     enabled: true,
-    explorerName: 'SnowTrace Explorer',
-    explorerUrl: 'https://snowtrace.io/',
+    explorerName: 'Avascan Explorer',
+    explorerUrl: 'https://avascan.info/',
     nativeCurrency: {
       name: 'AVAX',
       symbol: 'AVAX',
@@ -50,11 +50,11 @@ export const blockchains = {
       symbol: 'POL',
       decimals: 18,
     },
-    publicRpc: 'https://polygon.llamarpc.com', // Batch size reasonable.
+    publicRpc: 'https://polygon-rpc.com', // Batch size limit 8.
     altPublicRpc: [
-      'https://polygon-rpc.com', // Batch size limit 8.
       'https://rpc.ankr.com/polygon', // Batch size limit 8.
       'https://1rpc.io/matic', // Batch size limit 8.
+      'https://polygon.llamarpc.com', // Batch size 28.
     ],
   },
 };

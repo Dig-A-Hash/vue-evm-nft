@@ -4,36 +4,33 @@ import { useNftStore } from '../stores/nftStore';
 import { ethers } from 'ethers';
 
 /**
- * Initializes the NFT Gallery composable exposing several variables and
- * functions needed to sort and page through EVM based NFT Contracts. This
- * component is dependant on the useEvmNft composable, and Pinia nftStore.
- * @param {string} contractPublicKey - The public key of the wallet holding the contract.
- * @param {string} contractAddress - The contract address.
- * @param {array} abi - The contract ABI.
- * @param {number} chainId - The EVM Chain ID, pass null to use Dig-A-Hash
- * meta-data for improved Meta Data fetching performance.
- * @param {string} holderPublicKey - Gets NFTs on contract held by this wallet only.
- * If null, all NFTs on contract will return.
- * @param {string} ethersProviderUrl - The Ethers provider for the Chain ID.
- * @param {number} itemsPerPage - The number of items to get per page.
- * @param {string} nftStoreItemCollectionName - The NFT Store collection name.
- * @param {boolean} isAscendingSort - Sorting by Token ID direction.
+ * Initializes the NFT Gallery composable exposing several variables and functions
+ * needed to sort and page through EVM based NFT Contracts. This will be a little
+ * slower than useEvmMetaDataGallery, and public PRCs will enforce smaller page
+ * sizes because this composable will verify every NFT on-chain, which results in a
+ * Blockchain RPC call for every NFT. That also means this composable cannot fetch
+ * all NFTs on a contract at once, blockchain RPCs will not serve that purpose
+ * well. However, such blockchain verification allows this composable to fetch
+ * NFTs from a specific wallet, or all NFTs on contract.
+ * @param {object} config - The EvmNftOptions configuration object for
+ * the useEvmNftGallery.
  * @returns page, numberOfPages, nfts, isAscending, toggleSortOrder,
- * isLoading loadingMessage, getNftPage, getTokenOwner, getTokenMetaData, getMetaDataBatch
+ * isLoading loadingMessage, getNftPage, getTokenOwner, getTokenMetaData.
  */
-export function useEvmNftGallery(
-  contractPublicKey,
-  contractAddress,
-  abi,
-  chainId,
-  holderPublicKey,
-  ethersProviderUrl,
-  itemsPerPage,
-  nftStoreItemCollectionName,
-  isAscendingSort
-) {
-  const nftStore = useNftStore();
+export function useEvmNftGallery(config) {
+  const {
+    contractPublicKey,
+    contractAddress,
+    abi,
+    chainId,
+    holderPublicKey,
+    rpc,
+    itemsPerPage,
+    nftStoreItemCollectionName,
+    isAscendingSort,
+  } = config;
 
+  const nftStore = useNftStore();
   const page = ref(1);
   const numberOfPages = ref(0);
   const nfts = ref([]);
@@ -45,14 +42,13 @@ export function useEvmNftGallery(
   let _getMyNfts = null;
   let _getTokenOwner = null;
   let _getTokenMetaData = null;
-  let _getMetaDataBatch = null;
 
   onMounted(async () => {
     nftStore.addCollection(nftStoreItemCollectionName);
 
     const evmNft = await useEvmNft(
       parseInt(itemsPerPage),
-      new ethers.JsonRpcProvider(ethersProviderUrl),
+      new ethers.JsonRpcProvider(rpc),
       holderPublicKey,
       contractPublicKey,
       contractAddress,
@@ -66,7 +62,6 @@ export function useEvmNftGallery(
     _getMyNfts = evmNft.getNfts;
     _getTokenOwner = evmNft.getTokenOwner;
     _getTokenMetaData = evmNft.getTokenMetaData;
-    _getMetaDataBatch = evmNft.getMetaDataBatch;
 
     await getNftPage(page.value);
   });
@@ -149,15 +144,6 @@ export function useEvmNftGallery(
     return await _getTokenMetaData(tokenIds);
   }
 
-  /**
-   * Retrieves metadata for a batch of tokens. Exposing a proxy function for evmNft.
-   * @param {array} batchObjects - Array of batch objects, each containing details for multiple tokens.
-   * @returns {Promise<object>} - A promise that resolves with the metadata for the batch of tokens.
-   */
-  async function getMetaDataBatch(batchObjects) {
-    return await _getMetaDataBatch(batchObjects);
-  }
-
   return {
     page,
     numberOfPages,
@@ -169,6 +155,5 @@ export function useEvmNftGallery(
     getNftPage,
     getTokenOwner,
     getTokenMetaData,
-    getMetaDataBatch,
   };
 }

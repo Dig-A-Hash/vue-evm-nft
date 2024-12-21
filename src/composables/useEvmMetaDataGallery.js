@@ -4,36 +4,30 @@ import { useNftStore } from '../stores/nftStore';
 import { ethers } from 'ethers';
 
 /**
- * Initializes the NFT Gallery composable exposing several variables and
- * functions needed to sort and page through EVM based NFT Contracts. This
- * component is dependant on the useEvmNft composable, and Pinia nftStore.
- * @param {string} contractPublicKey - The public key of the wallet holding the contract.
- * @param {string} contractAddress - The contract address.
- * @param {array} abi - The contract ABI.
- * @param {number} chainId - The EVM Chain ID, pass null to use Dig-A-Hash
- * meta-data for improved Meta Data fetching performance.
- * @param {string} holderPublicKey - Gets NFTs on contract held by this wallet only.
- * If null, all NFTs on contract will return.
- * @param {string} ethersProviderUrl - The Ethers provider for the Chain ID.
- * @param {number} itemsPerPage - The number of items to get per page.
- * @param {string} nftStoreItemCollectionName - The NFT Store collection name.
- * @param {boolean} isAscendingSort - Sorting by Token ID direction.
- * @param {boolean} isGetAllNftQuery - If true, fetches all NFTs in one query.
+ * Similar to the useEvmNftGallery but this composable is designed to fetch
+ * NFT meta data with much less on-chain validation. This allows for faster
+ * fetching, and larger page sizes, including the ability to fetch all NFTs
+ * in one query. This composable cannot fetch NFTs from a specific wallet,
+ * and is designed only to fetch all NFTs on a contract.
+ * @param {object} config - The EvmMetaDataOptions configuration object for
+ * the useEvmMetaDataGallery.
  * @returns page, numberOfPages, nfts, isAscending, toggleSortOrder,
- * isLoading loadingMessage, getNftPage, getTokenOwner, getTokenMetaData, getMetaDataBatch
+ * isLoading loadingMessage, getNftPage, getTokenOwner, getTokenMetaData.
  */
-export function useEvmMetaDataGallery(
-  contractPublicKey,
-  contractAddress,
-  abi,
-  chainId,
-  holderPublicKey,
-  ethersProviderUrl,
-  itemsPerPage,
-  nftStoreItemCollectionName,
-  isAscendingSort,
-  isGetAllNftQuery
-) {
+export function useEvmMetaDataGallery(config) {
+  const {
+    contractPublicKey,
+    contractAddress,
+    abi,
+    chainId,
+    rpc,
+    itemsPerPage,
+    nftStoreItemCollectionName,
+    isAscendingSort,
+    isGetAllNftQuery,
+  } = config;
+
+  const holderPublicKey = null;
   const nftStore = useNftStore();
 
   const page = ref(1);
@@ -47,14 +41,13 @@ export function useEvmMetaDataGallery(
   let _getMyNfts = null;
   let _getTokenOwner = null;
   let _getTokenMetaData = null;
-  let _getMetaDataBatch = null;
 
   onMounted(async () => {
     nftStore.addCollection(nftStoreItemCollectionName);
 
     const evmNft = await useEvmNft(
       parseInt(itemsPerPage),
-      new ethers.JsonRpcProvider(ethersProviderUrl),
+      new ethers.JsonRpcProvider(rpc),
       holderPublicKey,
       contractPublicKey,
       contractAddress,
@@ -68,7 +61,6 @@ export function useEvmMetaDataGallery(
     _getMyNfts = evmNft.getMetaDataCollection;
     _getTokenOwner = evmNft.getTokenOwner;
     _getTokenMetaData = evmNft.getTokenMetaData;
-    _getMetaDataBatch = evmNft.getMetaDataBatch;
 
     if (isGetAllNftQuery) {
       await getAllNfts();
@@ -184,15 +176,6 @@ export function useEvmMetaDataGallery(
     return await _getTokenMetaData(tokenIds);
   }
 
-  /**
-   * Retrieves metadata for a batch of tokens. Exposing a proxy function for evmNft.
-   * @param {array} batchObjects - Array of batch objects, each containing details for multiple tokens.
-   * @returns {Promise<object>} - A promise that resolves with the metadata for the batch of tokens.
-   */
-  async function getMetaDataBatch(batchObjects) {
-    return await _getMetaDataBatch(batchObjects);
-  }
-
   return {
     page,
     numberOfPages,
@@ -204,6 +187,5 @@ export function useEvmMetaDataGallery(
     getNftPage,
     getTokenOwner,
     getTokenMetaData,
-    getMetaDataBatch,
   };
 }
