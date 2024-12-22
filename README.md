@@ -17,16 +17,16 @@ No API is needed, the blockchain is the API!
 - Sorting by Token ID.
 - Local caching with Pinia.
 - More efficient RPC Batch Call support. 
-- Utilities for working with Meta Data structures.
+- Utilities for working with NFT Meta Data structures.
 
 ## Dependencies
 
 This package depends on other packages such as `axios`, `ethers.js`, `pinia`, and `vue`. Your project should already have these installed, this package has been tested with...
 
-- axios 1.7.7
-- ethers.js 6.13.3
-- pinia 2.2.4
-- vue 3.5.11
+- axios 1.7.7+
+- ethers.js 6.13.3+
+- pinia 2.2.4+
+- vue 3.5.11+
 
 ## Installation
 
@@ -37,9 +37,30 @@ npm install vue-evm-nft
 ```
 
 # Docs
-This project is free and open source, although it was originally built to work with [Dig-A-Hash Dynamic Meta Data Services](https://www.dig-a-hash.com). We build lots of websites that display NFTs, so this component was super useful to us. However, Dig-A-Hash specific settings have been removed from this package so that these components can be used for any NFT project, on any EVM-compatible blockchain. 
+This project is free and open source, although it was originally built to work with [Dig-A-Hash Dynamic Meta Data Services](https://www.dig-a-hash.com). We build lots of websites that display NFTs, so these components are super useful to us. Some of these components can be used for any NFT project, on any EVM-compatible blockchain, while others will be exclusively for use with NFT collections using Dig-A-Hash Dynamic Meta Data.
 
-This package ships with 2 composables, 2 Pinia stores, and modules containing the ABI arrays for the various Dig-A-Hash NFT Smart Contracts.
+This package ships with 3 composables, 2 Pinia stores, and modules containing the ABI arrays for the various Dig-A-Hash NFT Smart Contracts.
+
+Web 3 developers are expected to provide params for their own contracts, wallets, ABIs, and RPCs. Web 3 developers should have a solid working knowledge of the [Ethereum Virtual Machine (EVM)](https://ethereum.org/en/developers/docs/evm/), [Open Zeppelin](https://docs.openzeppelin.com/), [Vuetify](https://vuetifyjs.com/en/), [Vue](https://vuejs.org/), and [Pinia](https://pinia.vuejs.org/).
+
+There are 2 main composables to use...
+
+```useEvmNftGallery``` - Can be used with any EVM-based NFT project.
+
+```useEvmMetaDataGallery``` - Can only be used with [Dig-A-Hash Dynamic Meta Data Services](https://www.dig-a-hash.com).
+
+There are some other small differences below...
+
+|Composable|Fully Verify NFTs On-Chain|List Tokens in a Specific Wallet|List All Tokens on Contract|Get All Tokens in 1 Call|Large Page Sizes|
+|----------|----------|----------|----------|----------|----------|
+|```useEvmNftGallery``` |X|X|X|||
+|```useEvmMetaDataGallery``` |||X|X|X|
+
+## useEvmNftGallery
+
+The `useEvmNftGallery` composable is designed to work with any NFT project displaying NFTs stored in EVM-based contracts. It allows sorting and pagination through NFTs while leveraging other composables (`useEvmNft` and `useEvmNftStore`) for local caching and utility functions. 
+
+This composable will get the Meta Data from the URL of every NFT as it is listed on-chain. So this composable can be used even if your NFTs do not use Dig-A-Hash dynamic Meta Data. This composable will be a little slower than useEvmMetaDataGallery, and public PRCs will enforce smaller page sizes. This composable cannot fetch all NFTs on a contract at once, blockchain RPCs simply do not serve that purpose well. However, the blockchain verification allows this composable to fetch bNFTs from a specific wallet, or all NFTs on contract.
 
 ## Usage
 
@@ -51,32 +72,28 @@ import {
 } from 'vue-evm-nft';
 
 const { page, numberOfPages, nfts, isAscending, toggleSortOrder, getNftPage, getTokenOwner, getTokenMetaData } =
-  useEvmNftGallery(
+  useEvmNftGallery({
     contractPublicKey,
     contractAddress,
-    abi,
+    abi: dahDemoV1Abi,
     chainId,
-    null,
-    blockchains.fantom.publicRpc,
+    holderPublicKey: null,
+    rpc: blockchains.avalanche.publicRpc,
     itemsPerPage,
-    nftStoreCollectionName,
-    false
-  );
+    nftStoreItemCollectionName,
+    isAscendingSort: true,
+  });
 ```
 
-## useEvmNftGallery
-
-The `useEvmNftGallery` composable is designed to manage and display NFTs stored in EVM-based contracts. It allows sorting and pagination through NFTs while leveraging other composables (`useEvmNft` and `useEvmNftStore`) for local caching and enhanced functionality.
-
-#### Parameters
+#### Configuration Object (config: EvmNftOptions)
 - **`contractPublicKey`** (`string`): The public key of the wallet holding the contract.
 - **`contractAddress`** (`string`): The address of the NFT contract.
 - **`abi`** (`array`): The contract's ABI (Application Binary Interface).
 - **`chainId`** (`number`): The EVM Chain ID. Pass `null` if you are not using Dig-A-Hash meta data, then the composable will get the Meta Dat from the token by making a call to the contract. Pass a chain ID if using Dig-A-Hash hosted meta data for improved performance when fetching meta data.
 - **`holderPublicKey`** (`string`): (Optional) If provided, fetches NFTs owned by this wallet. If `null`, it will return all NFTs associated with the contract. Warning: If the contract has burned tokens, then passing null here will result in inaccurate counts and listings, the only option for this case is to pass a public Key instead (not null).
-- **`ethersProviderUrl`** (`string`): The URL of the Ethers provider corresponding to the specified chain.
+- **`rpc`** (`string`): The URL of the Ethers provider corresponding to the specified chain.
 - **`itemsPerPage`** (`number`): The number of NFTs to display per page.
-- **`nftStoreItemCollectionName`** (`string`): The name of the NFT store collection.
+- **`nftStoreItemCollectionName`** (`string`): The name of the NFT store collection, used to reference the cache in Pinia.  Use a unique name to be referenced later, whenever you need to access the cached NFTs in the store by page.
 - **`isAscendingSort`** (`boolean`): Determines the starting sorting order of the NFTs. Set to `true` for ascending order, `false` for descending. Use onToggleSortOrder() to change the sort direction.
 
 #### Returns an object containing:
@@ -91,8 +108,69 @@ The `useEvmNftGallery` composable is designed to manage and display NFTs stored 
 - **`getTokenOwner`**: An async function to get the current token holder wallet address.
 - **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
 
+## useEvmMetaDataGallery
+
+The `useEvmMetaDataGallery` composable is designed to work with NFT contracts using [Dig-A-Hash Dynamic Meta Data Services](https://www.dig-a-hash.com). It allows sorting and pagination through NFTs while leveraging other composables (`useEvmNft` and `useEvmNftStore`) for local caching and enhanced functionality. 
+
+This composable is similar to the useEvmNftGallery but this composable is designed to fetch NFT meta data with much less on-chain validation. This allows for faster fetching, and larger page sizes, including the ability to fetch all NFTs in one query. This composable cannot fetch NFTs from a specific wallet, and is designed only to fetch all NFTs on a contract.
+
+## Usage
+
+```javascript
+import {
+  useEvmMetaDataGallery,
+  blockchains,
+  dahDemoV1Abi as abi,
+} from 'vue-evm-nft';
+
+const {
+  page,
+  numberOfPages,
+  nfts,
+  isLoading,
+  loadingMessage,
+  isAscending,
+  toggleSortOrder,
+} = useEvmMetaDataGallery({
+  contractPublicKey,
+  contractAddress,
+  abi,
+  chainId: blockchains.fantom.chainId,
+  rpc: blockchains.fantom.publicRpc,
+  itemsPerPage,
+  nftStoreItemCollectionName,
+  isAscendingSort: false,
+  isGetAllNftQuery: false,
+});
+```
+
+#### Configuration Object (config: EvmMetaDataOptions)
+- **`contractPublicKey`** (`string`): The public key of the wallet holding the contract.
+- **`contractAddress`** (`string`): The address of the NFT contract.
+- **`abi`** (`array`): The contract's ABI (Application Binary Interface).
+- **`chainId`** (`number`): The EVM Chain ID. Pass `null` if you are not using Dig-A-Hash meta data, then the composable will get the Meta Dat from the token by making a call to the contract. Pass a chain ID if using Dig-A-Hash hosted meta data for improved performance when fetching meta data.
+- **`rpc`** (`string`): The URL of the Ethers provider corresponding to the specified chain.
+- **`itemsPerPage`** (`number`): The number of NFTs to display per page.
+- **`nftStoreItemCollectionName`** (`string`): The name of the NFT store collection, used to reference the cache in Pinia. Use a unique name to be referenced later, whenever you need to access the cached NFTs in the store by page.
+- **`isAscendingSort`** (`boolean`): Determines the starting sorting order of the NFTs. Set to `true` for ascending order, `false` for descending. Use onToggleSortOrder() to change the sort direction.
+- **`isGetAllNftQuery`** (`boolean`): Set to `true` to get all NFTs back in the entire collection, this will be done in batches of `itemsPerPage`. `false` to get back pages of data with `itemsPerPage` items in each page.
+
+#### Returns an object containing:
+- **`page`**: The current page of NFTs being displayed. Changing page will cause the component to fetch and store the new page of NFTs in Pinia. If the page has already been fetched, it will not fetch again until page refresh.
+- **`numberOfPages`**: The total number of pages based on the number of items and the `itemsPerPage`specified in the params above.
+- **`nfts`**: The current page of NFTs to be displayed.
+- **`isAscending`**: The current sorting order of NFTs.
+- **`toggleSortOrder`**: A function to toggle or change the sorting order of NFTs.
+- **`isLoading`**: A boolean that will indicate whether or not the component is fetching. Create a vue watcher to track changes.
+- **`loadingMessage`**: A string that will indicate exactly what the component is doing while isLoading is true. Create a vue watcher to track changes.
+- **`getNftPage`**: An async function that takes a param indicating which page of NFTs to fetch from the contract.
+- **`getTokenOwner`**: An async function to get the current token holder wallet address.
+- **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
+
 ## useEvmNft
-This is used internally by useEvmNftGallery but it can still be used directly. The useEvmNft composable fetches NFT data from an ERC721 contract and retrieves metadata either directly from the blockchain or via the Dig-A-Hash storage pattern. It supports pagination, sorting, and retrieving the current owner of a token.
+The useEvmNft composable fetches NFT data from an ERC721 contract and retrieves metadata either directly from the blockchain or via the Dig-A-Hash storage pattern. It supports pagination, sorting, and retrieving the current owner of a token.
+
+This is used internally by useEvmNftGallery, and useEvmMetaDataGallery. This composable can still be used directly but the best way to use this composable is through useEvmNftGallery or useEvmMetaDataGallery as both composables will pass the public functions from useEvmNft through to the host component. For example, the functions getNftPage(), getTokenOwner(), and getTokenMetaData() returned from this useEvmNftGallery, and useEvmMetaDataGallery are passed through from useEvmNft.
 
 - **`pageSize`** (`number`): The number of NFTs to display per page.
 - **`provider`** (`object`): The `ethers.js` provider instance.
@@ -134,11 +212,31 @@ const loadNFTs = async () => {
 ## useNftStore
 This Pinia store used internally by useEvmNftGallery but it can still be used directly. The `useNftStore` is a Pinia store used to manage collections of NFTs, their metadata, and associated image URLs. It allows for efficient retrieval and management of NFT attributes, including safe handling of different image sizes. 
 
+Refer to the various NFT collections in the store using nftStoreItemCollectionName.
+
 #### State
 - **`itemCollections`** (`object`): Stores NFT collections. Each collection is keyed by its name and contains the following properties:
   - **`items`** (`array`): An array of NFTs for each page.
   - **`itemCount`** (`number`): The total number of items in the collection.
   - **`page`** (`number`): The current page of items being viewed.
+
+```
+import {
+  useEvmNftGallery,
+  useEvmMetaDataGallery,
+  blockchains,
+  dahDemoV1Abi as abi,
+  useNftStore,
+} from 'vue-evm-nft';
+
+const nftStore = useNftStore();
+
+// page 1
+nftStore.$state.itemCollections[nftStoreItemCollectionName].items[0];
+
+// current page
+nftStore.$state.itemCollections[nftStoreItemCollectionName].page;
+```
 
 #### Getters
 - **`getNftUrl`** (`function`): Generates the URL for viewing an NFT on the website.
