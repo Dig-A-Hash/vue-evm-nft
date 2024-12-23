@@ -9,7 +9,7 @@ let contractPublicKey = '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4';
 let contractAddress = '0x9c870E5B8724Db43E58Cd62C424E3071A3FB66E9';
 let chainId = blockchains.polygon.chainId;
 let itemsPerPage = 5;
-let nftStoreCollectionName = 'nftSmartContract1';
+let nftStoreItemCollectionName = 'nftSmartContract1';
 const suspenseTemplate = '<Suspense><div></div></Suspense>';
 
 test.beforeEach(() => {
@@ -20,17 +20,17 @@ test('should fetch page 1 of all NFTs on contract', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts } = useEvmNftGallery(
+        const { nfts } = useEvmNftGallery({
           contractPublicKey,
           contractAddress,
-          dahNftV2Abi,
+          abi: dahNftV2Abi,
           chainId,
-          null,
-          blockchains.polygon.publicRpc,
+          holderPublicKey: null,
+          rpc: blockchains.polygon.publicRpc,
           itemsPerPage,
-          nftStoreCollectionName,
-          true
-        );
+          nftStoreItemCollectionName,
+          isAscendingSort: true,
+        });
         return { nfts };
       },
       template: suspenseTemplate,
@@ -62,17 +62,17 @@ test('should fetch page 2 of all NFTs on contract', async (t) => {
   const wrapper = mount(
     {
       setup() {
-        const { nfts, getNftPage } = useEvmNftGallery(
+        const { nfts, getNftPage } = useEvmNftGallery({
           contractPublicKey,
           contractAddress,
-          dahNftV2Abi,
+          abi: dahNftV2Abi,
           chainId,
-          null,
-          blockchains.polygon.publicRpc, // otherwise batch too large
+          holderPublicKey: null,
+          rpc: blockchains.polygon.publicRpc, // otherwise batch too large
           itemsPerPage,
-          nftStoreCollectionName,
-          true
-        );
+          nftStoreItemCollectionName,
+          isAscendingSort: true,
+        });
 
         return { nfts, getNftPage };
       },

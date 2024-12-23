@@ -1,13 +1,15 @@
 import { StoreDefinition } from 'pinia';
 
 interface MetaDataAttribute {
-  trait_type?: string;
-  value?: string;
+  trait_type: string;
+  value: string;
 }
 
 export interface NftMetaData {
-  image?: string;
+  image: string;
   name: string;
+  tokenId?: number;
+  description: string;
   attributes?: MetaDataAttribute[];
 }
 
@@ -25,17 +27,20 @@ export interface NftStoreGetters {
   /**
    * Gets the URL for an NFT based on its token ID and path.
    */
-  getNftUrl: (tokenId: string | number, path: string) => string;
+  getNftUrl: (
+    tokenId: string | number,
+    path: string
+  ) => (tokenId: string | number, path: string) => string;
 
   /**
-   * Gets a large image URL for an NFT if available, otherwise the default NFT image.
+   * Appends an 'l' to the end of an image to get the large version from imgurl.
    */
-  getImageLarge: (metaData: NftMetaData) => string;
+  getImageLarge: (url: string) => (url: string) => string;
 
   /**
-   * Gets a medium image URL for an NFT if available, otherwise the default NFT image.
+   * Appends an 'm' to the end of an image to get the large version from imgurl.
    */
-  getImageMedium: (metaData: NftMetaData) => string;
+  getImageMedium: (url: string) => (url: string) => string;
 
   /**
    * Gets a public attribute value from the NFT metadata.

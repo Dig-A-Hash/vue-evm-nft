@@ -40,23 +40,53 @@ export const useNftStore = defineStore('nftStore', {
     // NFT Meta Data Attributes
 
     /**
-     * Gets a large version of the image if specified, otherwise the default NFT image.
-     * This is a safe, and efficient way to call for images.
-     * @returns An image URL.
+     * Converts an imgur original image to a smaller image.
+     * @returns
      */
-    getImageLarge: () => {
-      return (metaData) => {
-        return metaDataAttributeValueOrImage(metaData, 'url-large');
+    getImageMedium: () => {
+      return (url) => {
+        try {
+          const lastDotIndex = url.lastIndexOf('.');
+
+          // If there's no extension, just add "m" to the file name
+          if (lastDotIndex === -1) {
+            return url + 'm';
+          }
+
+          // Split the name and extension
+          const namePart = url.substring(0, lastDotIndex);
+          const extensionPart = url.substring(lastDotIndex);
+
+          // Add "m" to the name part, keep the extension as is
+          return `${namePart}m${extensionPart}`;
+        } catch (error) {
+          return url;
+        }
       };
     },
     /**
-     * Gets a medium version of the image if specified, otherwise the default NFT image.
-     * This is a safe, and efficient way to call for images.
-     * @returns An image URL.
+     * Converts an imgur original image to a large image. Still smaller than the original.
+     * @returns
      */
-    getImageMedium: () => {
-      return (metaData) => {
-        return metaDataAttributeValueOrImage(metaData, 'url-medium');
+    getImageLarge: () => {
+      return (url) => {
+        try {
+          const lastDotIndex = url.lastIndexOf('.');
+
+          // If there's no extension, just add "l" to the file name
+          if (lastDotIndex === -1) {
+            return url + 'l';
+          }
+
+          // Split the name and extension
+          const namePart = url.substring(0, lastDotIndex);
+          const extensionPart = url.substring(lastDotIndex);
+
+          // Add "l" to the name part, keep the extension as is
+          return `${namePart}l${extensionPart}`;
+        } catch (error) {
+          return url;
+        }
       };
     },
     /**

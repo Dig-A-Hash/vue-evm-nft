@@ -4,33 +4,32 @@ import { useNftStore } from '../stores/nftStore';
 import { ethers } from 'ethers';
 
 /**
- * Initializes the NFT Gallery composable exposing several variables and functions
- * needed to sort and page through EVM based NFT Contracts. This will be a little
- * slower than useEvmMetaDataGallery, and public PRCs will enforce smaller page
- * sizes because this composable will verify every NFT on-chain, which results in a
- * Blockchain RPC call for every NFT. That also means this composable cannot fetch
- * all NFTs on a contract at once, blockchain RPCs will not serve that purpose
- * well. However, such blockchain verification allows this composable to fetch
- * NFTs from a specific wallet, or all NFTs on contract.
- * @param {object} config - The EvmNftOptions configuration object for
- * the useEvmNftGallery.
+ * Similar to the useEvmNftGallery but this composable is designed to fetch
+ * NFT meta data with much less on-chain validation. This allows for faster
+ * fetching, and larger page sizes, including the ability to fetch all NFTs
+ * in one query. This composable cannot fetch NFTs from a specific wallet,
+ * and is designed only to fetch all NFTs on a contract.
+ * @param {object} config - The EvmMetaDataOptions configuration object for
+ * the useEvmMetaDataGallery.
  * @returns page, numberOfPages, nfts, isAscending, toggleSortOrder,
  * isLoading loadingMessage, getNftPage, getTokenOwner, getTokenMetaData.
  */
-export function useEvmNftGallery(config) {
+export function useEvmMetaDataGallery(config) {
   const {
     contractPublicKey,
     contractAddress,
     abi,
     chainId,
-    holderPublicKey,
     rpc,
     itemsPerPage,
     nftStoreItemCollectionName,
     isAscendingSort,
+    isGetAllNftQuery,
   } = config;
 
+  const holderPublicKey = null;
   const nftStore = useNftStore();
+
   const page = ref(1);
   const numberOfPages = ref(0);
   const nfts = ref([]);
@@ -59,11 +58,15 @@ export function useEvmNftGallery(config) {
     loadingMessage.value = evmNft.loadingMessage; // bind ref to loadingMessage
 
     // Set the function pointer for calling later, after mount.
-    _getMyNfts = evmNft.getNfts;
+    _getMyNfts = evmNft.getMetaDataCollection;
     _getTokenOwner = evmNft.getTokenOwner;
     _getTokenMetaData = evmNft.getTokenMetaData;
 
-    await getNftPage(page.value);
+    if (isGetAllNftQuery) {
+      await getAllNfts();
+    } else {
+      await getNftPage(page.value);
+    }
   });
 
   // Get NFTs if page changes.
@@ -110,8 +113,18 @@ export function useEvmNftGallery(config) {
         iPage,
         isAscending.value
       );
-      nfts.value = tokens;
-      nftStore.setCollectionItems(iPage, tokens, nftStoreItemCollectionName);
+      // append tokens if isGetAllNftQuery is true
+      if (isGetAllNftQuery) {
+        nfts.value = nfts.value.concat(tokens);
+      } else {
+        nfts.value = tokens;
+      }
+
+      nftStore.setCollectionItems(
+        iPage,
+        nfts.value, // used to be tokens, just need the appended items
+        nftStoreItemCollectionName
+      );
       nftStore.itemCollections[nftStoreItemCollectionName].page = Math.ceil(
         count / pageSize
       );
@@ -120,6 +133,25 @@ export function useEvmNftGallery(config) {
       nftStore.itemCollections[nftStoreItemCollectionName].itemCount = count;
     } catch (error) {
       console.error('Error in getNftPage:', error);
+      throw error;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  /**
+   * Fetches all NFTs and associated metadata for a given contract in a loop
+   * with no paging.
+   */
+  async function getAllNfts() {
+    try {
+      isLoading.value = true;
+      await getNftPage(1);
+      for (let i = 2; i <= numberOfPages.value; i++) {
+        await getNftPage(i);
+      }
+    } catch (error) {
+      console.error('Error in getAllNfts:', error);
       throw error;
     } finally {
       isLoading.value = false;
