@@ -68,7 +68,7 @@ test('should fetch page 2 of all NFTs on contract', async (t) => {
           abi: dahNftV2Abi,
           chainId,
           holderPublicKey: null,
-          rpc: blockchains.polygon.publicRpc, // otherwise batch too large
+          rpc: blockchains.polygon.altPublicRpc[2], // otherwise batch too large
           itemsPerPage,
           nftStoreItemCollectionName,
           isAscendingSort: true,

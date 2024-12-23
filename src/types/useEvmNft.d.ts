@@ -1,6 +1,6 @@
 import { Ref } from 'vue';
 import { ethers } from 'ethers';
-import { NftMetaData } from './useNftStore';
+import { Nft, NftMetaData } from './useNftStore';
 
 /**
  * Composable for interacting with EVM-based NFT contracts.
@@ -16,7 +16,7 @@ import { NftMetaData } from './useNftStore';
  */
 export declare function useEvmNft(
   pageSize: number,
-  provider: ethers.JsonRpcProvider,
+  provider: ethers.JsonRpcProvider | null,
   holderPublicKey: string | null,
   contractOwnerPublicKey: string,
   contractAddress: string,
@@ -34,36 +34,10 @@ export declare function useEvmNft(
     page: number,
     isAscending: boolean
   ) => Promise<{
-    tokens: Array<{
-      tokenId: number;
-      metaData: NftMetaData | null;
-      metaDataUrl: string;
-      owner: string | null;
-      privateData: object | null;
-    }>;
+    tokens: Nft[];
     pageSize: number;
     count: number;
   }>;
-
-  /**
-   * Fetches metadata for a batch of token IDs.
-   *
-   * @param batchedTokenIds - Array of objects with `tokenId` and `owner` properties.
-   * @param isAscending - Whether to sort metadata in ascending order.
-   * @returns Promise resolving to an array of tokens with metadata and owner information.
-   */
-  getMetaDataBatch: (
-    batchedTokenIds: Array<{ tokenId: number; owner: string | null }>,
-    isAscending: boolean
-  ) => Promise<
-    Array<{
-      tokenId: number;
-      metaDataUrl: string;
-      metaData: NftMetaData | null;
-      privateData: object | null;
-      owner: string | null;
-    }>
-  >;
 
   /**
    * Fetches metadata for a list of token IDs.
@@ -71,14 +45,7 @@ export declare function useEvmNft(
    * @param tokenIds - Array of token IDs.
    * @returns Promise resolving to an array of token objects with metadata.
    */
-  getTokenMetaData: (tokenIds: number[]) => Promise<
-    Array<{
-      tokenId: number;
-      metaDataUrl: string;
-      metaData: NftMetaData | null;
-      privateData: object | null;
-    }>
-  >;
+  getTokenMetaData: (tokenIds: number[]) => Promise<Nft[]>;
 
   /**
    * Fetches the owner of a specific token.

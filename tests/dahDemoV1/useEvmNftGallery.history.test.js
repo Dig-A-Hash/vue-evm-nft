@@ -124,7 +124,7 @@ test('should fetch page 1 of all NFTs on contract in desc order', async (t) => {
           abi: dahDemoV1Abi,
           chainId: blockchains.fantom.chainId,
           holderPublicKey: null,
-          chainId: blockchains.fantom.publicRpc,
+          rpc: blockchains.fantom.publicRpc,
           itemsPerPage: 24,
           nftStoreItemCollectionName: 'a1',
           isAscendingSort: false,

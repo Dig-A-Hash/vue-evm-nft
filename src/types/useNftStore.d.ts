@@ -1,6 +1,6 @@
 import { StoreDefinition } from 'pinia';
 
-interface MetaDataAttribute {
+export interface MetaDataAttribute {
   trait_type: string;
   value: string;
 }
@@ -8,9 +8,16 @@ interface MetaDataAttribute {
 export interface NftMetaData {
   image: string;
   name: string;
-  tokenId?: number;
   description: string;
   attributes?: MetaDataAttribute[];
+}
+
+export interface Nft {
+  tokenId: number;
+  metaData: NftMetaData;
+  metaDataUrl: string;
+  owner: string | null;
+  privateData: object | null;
 }
 
 export interface NftCollection {

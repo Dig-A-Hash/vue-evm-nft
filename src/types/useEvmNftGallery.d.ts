@@ -1,5 +1,5 @@
 import { type ref, Ref } from 'vue';
-import { NftMetaData } from './useNftStore';
+import { type Nft } from './useNftStore';
 
 /**
  * The EvmNftOptions configuration object for the useEvmNftGallery composable.
@@ -33,12 +33,12 @@ export interface EvmNftOptions {
 export declare function useEvmNftGallery(config: EvmNftOptions): {
   page: ref<number>;
   numberOfPages: ref<number>;
-  nfts: ref<NftMetaData[]>;
+  nfts: Ref<Nft[]>;
   isAscending: ref<boolean>;
   isLoading: ref<boolean>;
   loadingMessage: ref<string>;
   toggleSortOrder: () => Promise<void>;
   getNftPage: (iPage: number) => Promise<void>;
   getTokenOwner: (tokenId: number) => Promise<string>;
-  getTokenMetaData: (tokenIds: number[]) => Promise<object>;
+  getTokenMetaData: (tokenIds: number[]) => Promise<Nft[]>;
 };

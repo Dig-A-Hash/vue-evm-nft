@@ -168,9 +168,9 @@ const {
 - **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
 
 ## useEvmNft
-The useEvmNft composable fetches NFT data from an ERC721 contract and retrieves metadata either directly from the blockchain or via the Dig-A-Hash storage pattern. It supports pagination, sorting, and retrieving the current owner of a token.
+The useEvmNft composable is the core composable used internally by both useEvmNftGallery, and useEvmMetaDataGallery. 
 
-This is used internally by useEvmNftGallery, and useEvmMetaDataGallery. This composable can still be used directly but the best way to use this composable is through useEvmNftGallery or useEvmMetaDataGallery as both composables will pass the public functions from useEvmNft through to the host component. For example, the functions getNftPage(), getTokenOwner(), and getTokenMetaData() returned from this useEvmNftGallery, and useEvmMetaDataGallery are passed through from useEvmNft.
+This composable can be used directly to create new composables or just to use the helper functions it exposes (examples below). 
 
 - **`pageSize`** (`number`): The number of NFTs to display per page.
 - **`provider`** (`object`): The `ethers.js` provider instance.
@@ -184,29 +184,58 @@ This is used internally by useEvmNftGallery, and useEvmMetaDataGallery. This com
 #### Returns an object containing:
 - **`getNfts`** (`function`): Fetches NFTs based on the current page, pagination size, and sorting order.
 - **`getTokenOwner`** (`function`): Retrieves the owner of a specific NFT.
-- **`getMetaDataBatch`** (`function`): Retrieves metadata for a batch of NFTs.
 - **`getTokenMetaData`** (`function`): Retrieves metadata for specific token IDs.
 - **`loadingMessage`** (`ref`): A reactive reference to track the loading status message.
 
-#### Example Usage
+### Example Usage getTokenMetaData
+Easily get Dig-A-Hash Meta Data for an array of NFTs using ```getTokenMetaData```. Note that the ethers provider is not needed here, we are just fetching Meta Data using a simple http request, there will be no on-chain validation using this function.
+```typescript
+import {
+  useEvmNft,
+  type Nft,
+} from 'vue-evm-nft';
 
-```javascript
-import { useEvmNft, blockchains, dahNftV2Abi } from 'vue-evm-nft';
+const metaData = ref<Nft[]>([]);
 
-const { getNfts, getTokenOwner, loadingMessage } = useEvmNft(
-  10, // pageSize
-  blockchains.fantom.publicRpc, // ethers.js provider
-  null, // holderPublicKey
-  '0xOwnerPublicKey', // contractOwnerPublicKey
-  '0xContractAddress', // contractAddress
-  dahNftV2Abi, // contractABI
-  1 // chainId (if applicable)
-);
+onMounted(async () => {
+  const evmNft = await useEvmNft(
+    itemsPerPage, // This is ignored. Use any number.
+    null, // null Ethers provider is faster.
+    null,
+    contractPublicKey,
+    contractAddress,
+    abi,
+    chainId
+  );
 
-const loadNFTs = async () => {
-  const nfts = await getNfts(1, true); // Fetches the first page in ascending order
-  console.log(nfts);
-};
+  metaData.value = await evmNft.getTokenMetaData([1]);
+});
+```
+
+### Example Usage getTokenOwner
+Get the current holder of the token using ```getTokenOwner```. The ethers provider is needed here because we need to lookup the current holder on-chain.
+```typescript
+import { ethers } from 'ethers'; // import ethers 6
+import {
+  useEvmNft,
+  type Nft,
+} from 'vue-evm-nft';
+
+const tokenOwner = ref('');
+
+onMounted(async () => {
+  const evmNft = await useEvmNft(
+    itemsPerPage, // This is ignored. Use any number. 
+    new ethers.JsonRpcProvider(blockchains.avalanche.publicRpc),
+    null,
+    contractPublicKey,
+    contractAddress,
+    abi,
+    chainId
+  );
+
+  tokenOwner.value = await evmNft.getTokenOwner(1);
+});
 ```
 
 ## useNftStore
@@ -290,7 +319,7 @@ nftStore.addCollection('myCollection');
 nftStore.setCollectionItems(1, [{ tokenId: 1, metaData: {} }], 'myCollection');
 
 // Retrieve a large image URL for an NFT
-const largeImageUrl = nftStore.getImageLarge(nft.metaData);
+const largeImageUrl = nftStore.getImageLarge(nft.metaData.image);
 
 // Get a specific public attribute value from the NFT metadata
 const attributeValue = nftStore.getPublicAttributeValue(nft.metaData, 'rarity');
