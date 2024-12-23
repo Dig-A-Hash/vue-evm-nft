@@ -25,7 +25,7 @@ test('should fetch page 1 of NFTs by holder', async (t) => {
           contractAddress,
           abi: dahNftV2Abi,
           chainId,
-          contractPublicKey,
+          holderPublicKey: contractPublicKey,
           rpc: blockchains.polygon.publicRpc,
           itemsPerPage,
           nftStoreItemCollectionName,
@@ -65,8 +65,8 @@ test('should fetch page 2 of NFTs by holder', async (t) => {
           contractAddress,
           abi: dahNftV2Abi,
           chainId,
-          contractPublicKey,
-          rpc: blockchains.polygon.publicRpc, // otherwise batch too large
+          holderPublicKey: contractPublicKey,
+          rpc: blockchains.polygon.altPublicRpc[2], // otherwise batch too large
           itemsPerPage,
           nftStoreItemCollectionName,
           isAscendingSort: true,
