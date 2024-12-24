@@ -40,9 +40,10 @@ export async function useEvmNft(
   // Only initialize the contract if both contractAddress and contractABI are provided
   if (contractAddress && contractABI && provider) {
     contract = new ethers.Contract(contractAddress, contractABI, provider);
-    contractOwnerPublicKey = contractOwnerPublicKey.toLowerCase();
-    contractAddress = contractAddress.toLowerCase();
   }
+
+  contractOwnerPublicKey = contractOwnerPublicKey.toLowerCase();
+  contractAddress = contractAddress.toLowerCase();
 
   const loadingMessage = ref('');
 
