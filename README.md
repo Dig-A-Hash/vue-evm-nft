@@ -39,9 +39,21 @@ npm install vue-evm-nft
 # Docs
 This project is free and open source, although it was originally built to work with [Dig-A-Hash Dynamic Meta Data Services](https://www.dig-a-hash.com). We build lots of websites that display NFTs, so these components are super useful to us. Some of these components can be used for any NFT project, on any EVM-compatible blockchain, while others will be exclusively for use with NFT collections using Dig-A-Hash Dynamic Meta Data.
 
+## Examples
+The repos and links below show example code on how to use this package in a Vue app with JavaScript & TypeScript.
+
+### TypeScript
+Repo - https://github.com/KidSysco/vuetify-nft-gallery-ts/tree/main
+
+Demo - https://vuetify-nft-gallery-ts.vercel.app/
+
+### JavaScript
+Repo - https://github.com/Dig-A-Hash/vuetify-nft-gallery
+
+## Package Contents
 This package ships with 3 composables, 2 Pinia stores, and modules containing the ABI arrays for the various Dig-A-Hash NFT Smart Contracts.
 
-Web 3 developers are expected to provide params for their own contracts, wallets, ABIs, and RPCs. Web 3 developers should have a solid working knowledge of the [Ethereum Virtual Machine (EVM)](https://ethereum.org/en/developers/docs/evm/), [Open Zeppelin](https://docs.openzeppelin.com/), [Vuetify](https://vuetifyjs.com/en/), [Vue](https://vuejs.org/), and [Pinia](https://pinia.vuejs.org/).
+Web 3 developers are expected to provide params for their own contracts, wallets, ABIs, and RPCs. Web 3 developers should have a solid working knowledge of the [Ethereum Virtual Machine (EVM)](https://ethereum.org/en/developers/docs/evm/), [Open Zeppelin](https://docs.openzeppelin.com/), [Vue](https://vuejs.org/), and [Pinia](https://pinia.vuejs.org/).
 
 There are 2 main composables to use...
 
@@ -56,7 +68,7 @@ There are some other small differences below...
 |```useEvmNftGallery``` |X|X|X|||
 |```useEvmMetaDataGallery``` |||X|X|X|
 
-## useEvmNftGallery
+## useEvmNftGallery Composable
 
 The `useEvmNftGallery` composable is designed to work with any NFT project displaying NFTs stored in EVM-based contracts. It allows sorting and pagination through NFTs while leveraging other composables (`useEvmNft` and `useEvmNftStore`) for local caching and utility functions. 
 
@@ -108,7 +120,7 @@ const { page, numberOfPages, nfts, isAscending, toggleSortOrder, getNftPage, get
 - **`getTokenOwner`**: An async function to get the current token holder wallet address.
 - **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
 
-## useEvmMetaDataGallery
+## useEvmMetaDataGallery Composable
 
 The `useEvmMetaDataGallery` composable is designed to work with NFT contracts using [Dig-A-Hash Dynamic Meta Data Services](https://www.dig-a-hash.com). It allows sorting and pagination through NFTs while leveraging other composables (`useEvmNft` and `useEvmNftStore`) for local caching and enhanced functionality. 
 
@@ -167,7 +179,7 @@ const {
 - **`getTokenOwner`**: An async function to get the current token holder wallet address.
 - **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
 
-## useEvmNft
+## useEvmNft Composable
 The useEvmNft composable is the core composable used internally by both useEvmNftGallery, and useEvmMetaDataGallery. 
 
 This composable can be used directly to create new composables or just to use the helper functions it exposes (examples below). 
@@ -238,7 +250,7 @@ onMounted(async () => {
 });
 ```
 
-## useNftStore
+## useNftStore Pinia Store
 This Pinia store used internally by useEvmNftGallery but it can still be used directly. The `useNftStore` is a Pinia store used to manage collections of NFTs, their metadata, and associated image URLs. It allows for efficient retrieval and management of NFT attributes, including safe handling of different image sizes. 
 
 Refer to the various NFT collections in the store using nftStoreItemCollectionName.
