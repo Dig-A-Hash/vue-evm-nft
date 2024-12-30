@@ -7,7 +7,7 @@ export interface NativeCurrency {
 export interface BlockchainConfig {
   chainId: number;
   name: string;
-  enabled: boolean;
+  enabled?: boolean;
   explorerName: string;
   explorerUrl: string;
   nativeCurrency: NativeCurrency;

@@ -2,7 +2,6 @@ export const blockchains = {
   avalanche: {
     chainId: 43114,
     name: 'Avalanche',
-    enabled: true,
     explorerName: 'Avascan Explorer',
     explorerUrl: 'https://avascan.info/',
     nativeCurrency: {
@@ -12,10 +11,21 @@ export const blockchains = {
     },
     publicRpc: 'https://api.avax.network/ext/bc/C/rpc',
   },
+  bsc: {
+    chainId: 56,
+    name: 'Binance Smart Chain',
+    explorerName: 'BSC Mainnet Explorer',
+    explorerUrl: 'https://bscscan.com/',
+    nativeCurrency: {
+      name: 'BNB',
+      symbol: 'BNB',
+      decimals: 18,
+    },
+    publicRpc: 'https://bsc-dataseed1.defibit.io',
+  },
   ethereum: {
     chainId: 1,
     name: 'Ethereum',
-    enabled: true,
     iconUrl: '/img/blockchain-logos/eth.png',
     explorerName: 'EtherScan Explorer',
     explorerUrl: 'https://etherscan.io/',
@@ -29,7 +39,6 @@ export const blockchains = {
   fantom: {
     chainId: 250,
     name: 'Fantom',
-    enabled: true,
     explorerName: 'Fantom Mainnet Explorer',
     explorerUrl: 'https://ftmscan.com/',
     nativeCurrency: {
@@ -39,10 +48,33 @@ export const blockchains = {
     },
     publicRpc: 'https://rpcapi.fantom.network',
   },
+  harmony: {
+    chainId: 1666600000,
+    name: 'Harmony',
+    explorerName: 'Harmony Testnet Explorer',
+    explorerUrl: 'https://explorer.pops.one/',
+    nativeCurrency: {
+      name: 'ONE',
+      symbol: 'ONE',
+      decimals: 18,
+    },
+    publicRpc: 'https://api.s0.b.hmny.io',
+  },
+  optimism: {
+    chainId: 10,
+    name: 'Optimism',
+    explorerName: 'Optimism Explorer',
+    explorerUrl: 'https://optimistic.etherscan.io/',
+    nativeCurrency: {
+      name: 'ETH',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    publicRpc: 'https://mainnet.optimism.io',
+  },
   polygon: {
     name: 'Polygon',
     chainId: 137,
-    enabled: true,
     explorerName: 'Polygon Explorer',
     explorerUrl: 'https://polygonscan.com/',
     nativeCurrency: {
