@@ -37,5 +37,5 @@ export declare function useEvmMetaDataGallery(config: EvmMetaDataOptions): {
   toggleSortOrder: () => Promise<void>;
   getNftPage: (iPage: number) => Promise<void>;
   getTokenOwner: (tokenId: number) => Promise<string>;
-  getTokenMetaData: (tokenIds: number[]) => Promise<NftMetaData[]>;
+  getTokenMetaData: (tokenIds: number[]) => Promise<Nft[]>;
 };
