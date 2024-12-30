@@ -72,7 +72,7 @@ There are some other small differences below...
 
 The `useEvmNftGallery` composable is designed to work with any NFT project displaying NFTs stored in EVM-based contracts. It allows sorting and pagination through NFTs while leveraging other composables (`useEvmNft` and `useEvmNftStore`) for local caching and utility functions. 
 
-This composable will get the Meta Data from the URL of every NFT as it is listed on-chain. So this composable can be used even if your NFTs do not use Dig-A-Hash dynamic Meta Data. This composable will be a little slower than useEvmMetaDataGallery, and public PRCs will enforce smaller page sizes. This composable cannot fetch all NFTs on a contract at once, blockchain RPCs simply do not serve that purpose well. However, the blockchain verification allows this composable to fetch bNFTs from a specific wallet, or all NFTs on contract.
+This composable will get the Meta Data from the URL of every NFT as it is listed on-chain. So this composable can be used even if your NFTs do not use Dig-A-Hash dynamic Meta Data. This composable will be a little slower than useEvmMetaDataGallery, and public PRCs will enforce smaller page sizes (24 items per page or less). This composable cannot fetch all NFTs on a contract at once, blockchain RPCs simply do not serve that purpose well. However, the blockchain verification allows this composable to fetch NFTs from a specific wallet, or all NFTs on contract.
 
 ## Usage
 
@@ -83,7 +83,7 @@ import {
   dahDemoV1Abi as abi,
 } from 'vue-evm-nft';
 
-const { page, numberOfPages, nfts, isAscending, toggleSortOrder, getNftPage, getTokenOwner, getTokenMetaData } =
+const { page, numberOfPages, nfts, isAscending, toggleSortOrder, isLoading } =
   useEvmNftGallery({
     contractPublicKey,
     contractAddress,
@@ -95,13 +95,14 @@ const { page, numberOfPages, nfts, isAscending, toggleSortOrder, getNftPage, get
     nftStoreItemCollectionName,
     isAscendingSort: true,
   });
+});
 ```
 
 #### Configuration Object (config: EvmNftOptions)
-- **`contractPublicKey`** (`string`): The public key of the wallet holding the contract.
-- **`contractAddress`** (`string`): The address of the NFT contract.
-- **`abi`** (`array`): The contract's ABI (Application Binary Interface).
-- **`chainId`** (`number`): The EVM Chain ID. Pass `null` if you are not using Dig-A-Hash meta data, then the composable will get the Meta Dat from the token by making a call to the contract. Pass a chain ID if using Dig-A-Hash hosted meta data for improved performance when fetching meta data.
+- **`contractPublicKey`** (`string`): The public key of the wallet holding the NFT Smart Contract.
+- **`contractAddress`** (`string`): The address of the NFT Smart Contract.
+- **`abi`** (`array`): The NFT Smart Contract ABI (Application Binary Interface).
+- **`chainId`** (`number`): The EVM Chain ID. Pass `null` if you are not using Dig-A-Hash meta data, then the composable will get the Meta Data from the token by making a call to the contract. Pass a chain ID if using Dig-A-Hash hosted meta data for improved performance when fetching meta data.
 - **`holderPublicKey`** (`string`): (Optional) If provided, fetches NFTs owned by this wallet. If `null`, it will return all NFTs associated with the contract. Warning: If the contract has burned tokens, then passing null here will result in inaccurate counts and listings, the only option for this case is to pass a public Key instead (not null).
 - **`rpc`** (`string`): The URL of the Ethers provider corresponding to the specified chain.
 - **`itemsPerPage`** (`number`): The number of NFTs to display per page.
@@ -116,9 +117,9 @@ const { page, numberOfPages, nfts, isAscending, toggleSortOrder, getNftPage, get
 - **`toggleSortOrder`**: A function to toggle or change the sorting order of NFTs.
 - **`isLoading`**: A boolean that will indicate whether or not the component is fetching. Create a vue watcher to track changes.
 - **`loadingMessage`**: A string that will indicate exactly what the component is doing while isLoading is true. Create a vue watcher to track changes.
-- **`getNftPage`**: An async function that takes a param indicating which page of NFTs to fetch from the contract.
-- **`getTokenOwner`**: An async function to get the current token holder wallet address.
-- **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
+- **`getNftPage`**: An async function that takes a param indicating which page of NFTs to fetch from the contract. This is only a utility/convenience function that is not required. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getNftPage until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
+- **`getTokenOwner`**: An async function to get the current token holder wallet address. This is only a utility/convenience function that is not required. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getTokenMetaData until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
+- **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. This is only a utility/convenience function that is not required. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getTokenMetaData until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
 
 ## useEvmMetaDataGallery Composable
 
@@ -140,7 +141,6 @@ const {
   numberOfPages,
   nfts,
   isLoading,
-  loadingMessage,
   isAscending,
   toggleSortOrder,
 } = useEvmMetaDataGallery({
@@ -175,9 +175,9 @@ const {
 - **`toggleSortOrder`**: A function to toggle or change the sorting order of NFTs.
 - **`isLoading`**: A boolean that will indicate whether or not the component is fetching. Create a vue watcher to track changes.
 - **`loadingMessage`**: A string that will indicate exactly what the component is doing while isLoading is true. Create a vue watcher to track changes.
-- **`getNftPage`**: An async function that takes a param indicating which page of NFTs to fetch from the contract.
-- **`getTokenOwner`**: An async function to get the current token holder wallet address.
-- **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID.
+- **`getNftPage`**: An async function that takes a param indicating which page of NFTs to fetch from the contract. This is only a utility/convenience function that is not required. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getNftPage until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
+- **`getTokenOwner`**: An async function to get the current token holder wallet address. This is only a utility/convenience function that is not required. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getTokenMetaData until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
+- **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. This is only a utility/convenience function that is not required. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getTokenMetaData until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
 
 ## useEvmNft Composable
 The useEvmNft composable is the core composable used internally by both useEvmNftGallery, and useEvmMetaDataGallery. 
@@ -194,9 +194,9 @@ This composable can be used directly to create new composables or just to use th
 - **`excludeWallet`** (`string`): (Optional) The wallet to exclude from the list of NFTs.
 
 #### Returns an object containing:
-- **`getNfts`** (`function`): Fetches NFTs based on the current page, pagination size, and sorting order.
-- **`getTokenOwner`** (`function`): Retrieves the owner of a specific NFT.
-- **`getTokenMetaData`** (`function`): Retrieves metadata for specific token IDs.
+- **`getNfts`** (`function`): Fetches NFTs based on the current page, pagination size, and sorting order. There is no need for a watch when firing getTokenOwner from this composable. 
+- **`getTokenOwner`** (`function`): Retrieves the owner of a specific NFT. This composable is async, so it will not return until getTokenOwner is ready to fire. There is no need for a watch when firing getTokenOwner from this composable.
+- **`getTokenMetaData`** (`function`): Retrieves metadata for specific token IDs. This composable is async, so it will not return until getTokenMetaData is ready to fire. There is no need for a watch when firing getTokenMetaData from this composable.
 - **`loadingMessage`** (`ref`): A reactive reference to track the loading status message.
 
 ### Example Usage getTokenMetaData
