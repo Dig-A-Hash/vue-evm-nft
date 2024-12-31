@@ -2,8 +2,12 @@ export const blockchains = {
   avalanche: {
     chainId: 43114,
     name: 'Avalanche',
-    explorerName: 'Avascan Explorer',
-    explorerUrl: 'https://avascan.info/',
+    explorer: {
+      name: 'Avascan Explorer',
+      baseUrl: 'https://avascan.info/',
+      contractPathTemplate: 'blockchain/c/token/{contractAddress}',
+      tokenPathTemplate: 'blockchain/c/erc721/{contractAddress}/nft/{tokenId}',
+    },
     nativeCurrency: {
       name: 'AVAX',
       symbol: 'AVAX',
@@ -14,8 +18,12 @@ export const blockchains = {
   bsc: {
     chainId: 56,
     name: 'Binance Smart Chain',
-    explorerName: 'BSC Mainnet Explorer',
-    explorerUrl: 'https://bscscan.com/',
+    explorer: {
+      name: 'BSC Explorer',
+      baseUrl: 'https://bscscan.com/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
     nativeCurrency: {
       name: 'BNB',
       symbol: 'BNB',
@@ -26,9 +34,12 @@ export const blockchains = {
   ethereum: {
     chainId: 1,
     name: 'Ethereum',
-    iconUrl: '/img/blockchain-logos/eth.png',
-    explorerName: 'EtherScan Explorer',
-    explorerUrl: 'https://etherscan.io/',
+    explorer: {
+      name: 'EtherScan Explorer',
+      baseUrl: 'https://etherscan.io/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
     nativeCurrency: {
       name: 'Ether',
       symbol: 'ETH',
@@ -39,8 +50,12 @@ export const blockchains = {
   fantom: {
     chainId: 250,
     name: 'Fantom',
-    explorerName: 'Fantom Mainnet Explorer',
-    explorerUrl: 'https://ftmscan.com/',
+    explorer: {
+      name: 'Fantom Explorer',
+      baseUrl: 'https://ftmscan.com/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
     nativeCurrency: {
       name: 'FTM',
       symbol: 'FTM',
@@ -50,9 +65,13 @@ export const blockchains = {
   },
   harmony: {
     chainId: 1666600000,
-    name: 'Harmony',
-    explorerName: 'Harmony Testnet Explorer',
-    explorerUrl: 'https://explorer.pops.one/',
+    name: 'Harmony One',
+    explorer: {
+      name: 'Harmony One Explorer',
+      baseUrl: 'https://explorer.harmony.one/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}/instance/{tokenId}',
+    },
     nativeCurrency: {
       name: 'ONE',
       symbol: 'ONE',
@@ -63,8 +82,12 @@ export const blockchains = {
   optimism: {
     chainId: 10,
     name: 'Optimism',
-    explorerName: 'Optimism Explorer',
-    explorerUrl: 'https://optimistic.etherscan.io/',
+    explorer: {
+      name: 'Optimism Explorer',
+      baseUrl: 'https://optimistic.etherscan.io/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
     nativeCurrency: {
       name: 'ETH',
       symbol: 'ETH',
@@ -75,8 +98,12 @@ export const blockchains = {
   polygon: {
     name: 'Polygon',
     chainId: 137,
-    explorerName: 'Polygon Explorer',
-    explorerUrl: 'https://polygonscan.com/',
+    explorer: {
+      name: 'Polygon Explorer',
+      baseUrl: 'https://polygonscan.com/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
     nativeCurrency: {
       name: 'POL',
       symbol: 'POL',
