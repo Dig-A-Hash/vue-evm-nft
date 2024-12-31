@@ -1,20 +1,15 @@
 import { defineStore } from 'pinia';
+import { DIG_A_HASH_BASE_URL } from '../modules/constants';
 
 /**
- * Gets the specified public meta-data attribute value or the NFT image if
- * the  meta-data attribute value does not exist. This is used to
- * get smaller versions of the original image from meta-data
- * attributes.
- * @param {object} metaData - The NFT meta-data.
- * @param {string} propertyName - The NFT meta-data property name.
- * @returns A value from the meta-data.
+ * Gets the base URL for all DAH meta data.
+ * @param {string} contractPublicKey
+ * @param {number} chainId
+ * @param {string} contractAddress
+ * @returns a string of the base URL without a token ID.
  */
-function metaDataAttributeValueOrImage(metaData, propertyName) {
-  return (
-    metaData?.attributes?.find((item) => {
-      return item.trait_type?.toLowerCase() === propertyName.toLowerCase();
-    })?.value || metaData.image
-  );
+function deriveMetaDataBaseUrl(contractPublicKey, chainId, contractAddress) {
+  return `${DIG_A_HASH_BASE_URL}profiles/${contractPublicKey.toLowerCase()}/meta-data/${chainId}/${contractAddress.toLowerCase()}/`;
 }
 
 /**
@@ -30,18 +25,87 @@ export const useNftStore = defineStore('nftStore', {
 
   getters: {
     /**
-     * Gets the NFT URL for viewing on this website.
-     * @returns
+     * Gets the Blockchain Explorer URL for an NFT.
+     * @returns URL for viewing the NFT on the blockchain explorer.
      */
-    getNftUrl: () => {
-      return (tokenId, path) => `/${path}/${tokenId}`;
+    explorerTokenUrl: () => {
+      return (tokenId, contractAddress, blockchainConfig) => {
+        tokenId = tokenId.toString();
+        return `${
+          blockchainConfig.explorer.baseUrl
+        }${blockchainConfig.explorer.tokenPathTemplate
+          .replace('{contractAddress}', contractAddress)
+          .replace('{tokenId}', tokenId)}`;
+      };
     },
 
-    // NFT Meta Data Attributes
+    /**
+     * Gets the Blockchain Explorer URL for a Smart Contract.
+     * @returns URL for viewing the Smart Contract on the blockchain explorer.
+     */
+    explorerContractUrl: () => {
+      return (contractAddress, blockchainConfig) => {
+        return `${
+          blockchainConfig.explorer.baseUrl
+        }${blockchainConfig.explorer.contractPathTemplate.replace(
+          '{contractAddress}',
+          contractAddress
+        )}`;
+      };
+    },
 
     /**
-     * Converts an imgur original image to a smaller image.
-     * @returns
+     * Gets a path (no base URL) to the NFT item on this website,
+     * used for creating QR Codes linking directly to items.
+     * @param tokenId - The token ID of the NFT item.
+     * @param nftStoreItemCollectionName - The name of the collection.
+     * @returns A website path to the NFT item. This path will
+     * still need a base URL prepended.
+     */
+    nftPath: () => {
+      return (tokenId, nftStoreItemCollectionName) =>
+        `${nftStoreItemCollectionName}/${tokenId.toString()}`;
+    },
+
+    /**
+     * Gets a base URL to the NFT meta-data. This is only for use with  Dig-A-Hash Meta Data.
+     * @param contractPublicKey - The public key of the contract.
+     * @param chainId - The chain ID of the contract.
+     * @param contractAddress - The address of the contract.
+     * @returns The Dig-A-Hash Meta Data Base URL. This result will
+     * still need a token id appended.
+     */
+    digaMetaDataBaseUrl: () => {
+      return (contractPublicKey, chainId, contractAddress) => {
+        return deriveMetaDataBaseUrl(
+          contractPublicKey,
+          chainId,
+          contractAddress
+        );
+      };
+    },
+
+    /**
+     * Gets a full URL to the NFT meta-data. This is only for use with  Dig-A-Hash Meta Data.
+     * @param tokenId - The token ID of the NFT item.
+     * @param contractPublicKey - The public key of the contract.
+     * @param chainId - The chain ID of the contract.
+     * @param contractAddress - The address of the contract.
+     * @returns The Dig-A-Hash Meta Data URL.
+     */
+    digaMetaDataUrl: () => {
+      return (tokenId, contractPublicKey, chainId, contractAddress) => {
+        return `${deriveMetaDataBaseUrl(
+          contractPublicKey,
+          chainId,
+          contractAddress
+        )}${tokenId}.json`;
+      };
+    },
+
+    /**
+     * Gets the medium image URL by appending "m" to the file name.
+     * @returns - The image URL with an "m" appended to the file name.
      */
     getImageMedium: () => {
       return (url) => {
@@ -64,9 +128,10 @@ export const useNftStore = defineStore('nftStore', {
         }
       };
     },
+
     /**
-     * Converts an imgur original image to a large image. Still smaller than the original.
-     * @returns
+     * Gets the medium image URL by appending "l" to the file name.
+     * @returns - The image URL with an "l" appended to the file name.
      */
     getImageLarge: () => {
       return (url) => {
