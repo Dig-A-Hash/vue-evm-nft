@@ -1,12 +1,7 @@
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { ref } from 'vue';
-
-/**
- * This is used if chainId is not null because we can derive the path
- * using the chainId if the meta data is on Dig-A-Hash.
- */
-const DIG_A_HASH_BASE_URL = 'https://nft.dah-services.com/';
+import { DIG_A_HASH_BASE_URL } from '../modules/constants';
 
 /**
  * Gets contract and NFT data from the Blockchain by setting up the
