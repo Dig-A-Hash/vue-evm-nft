@@ -4,16 +4,20 @@ export interface NativeCurrency {
   decimals: number;
 }
 
+export interface BlockchainExplorer {
+  name: string;
+  baseUrl: string;
+  contractPathTemplate: string;
+  tokenPathTemplate: string;
+}
+
 export interface BlockchainConfig {
   chainId: number;
   name: string;
-  enabled: boolean;
-  explorerName: string;
-  explorerUrl: string;
+  explorer: BlockchainExplorer;
   nativeCurrency: NativeCurrency;
   publicRpc: string;
   altPublicRpc?: string[]; // Optional property for alternative RPC URLs
-  iconUrl?: string; // Optional property for blockchains like Ethereum
 }
 
 /**

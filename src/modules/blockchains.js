@@ -2,9 +2,12 @@ export const blockchains = {
   avalanche: {
     chainId: 43114,
     name: 'Avalanche',
-    enabled: true,
-    explorerName: 'Avascan Explorer',
-    explorerUrl: 'https://avascan.info/',
+    explorer: {
+      name: 'Avascan Explorer',
+      baseUrl: 'https://avascan.info/',
+      contractPathTemplate: 'blockchain/c/token/{contractAddress}',
+      tokenPathTemplate: 'blockchain/c/erc721/{contractAddress}/nft/{tokenId}',
+    },
     nativeCurrency: {
       name: 'AVAX',
       symbol: 'AVAX',
@@ -12,13 +15,31 @@ export const blockchains = {
     },
     publicRpc: 'https://api.avax.network/ext/bc/C/rpc',
   },
+  bsc: {
+    chainId: 56,
+    name: 'Binance Smart Chain',
+    explorer: {
+      name: 'BSC Explorer',
+      baseUrl: 'https://bscscan.com/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
+    nativeCurrency: {
+      name: 'BNB',
+      symbol: 'BNB',
+      decimals: 18,
+    },
+    publicRpc: 'https://bsc-dataseed1.defibit.io',
+  },
   ethereum: {
     chainId: 1,
     name: 'Ethereum',
-    enabled: true,
-    iconUrl: '/img/blockchain-logos/eth.png',
-    explorerName: 'EtherScan Explorer',
-    explorerUrl: 'https://etherscan.io/',
+    explorer: {
+      name: 'EtherScan Explorer',
+      baseUrl: 'https://etherscan.io/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
     nativeCurrency: {
       name: 'Ether',
       symbol: 'ETH',
@@ -29,9 +50,12 @@ export const blockchains = {
   fantom: {
     chainId: 250,
     name: 'Fantom',
-    enabled: true,
-    explorerName: 'Fantom Mainnet Explorer',
-    explorerUrl: 'https://ftmscan.com/',
+    explorer: {
+      name: 'Fantom Explorer',
+      baseUrl: 'https://ftmscan.com/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
     nativeCurrency: {
       name: 'FTM',
       symbol: 'FTM',
@@ -39,12 +63,47 @@ export const blockchains = {
     },
     publicRpc: 'https://rpcapi.fantom.network',
   },
+  harmony: {
+    chainId: 1666600000,
+    name: 'Harmony One',
+    explorer: {
+      name: 'Harmony One Explorer',
+      baseUrl: 'https://explorer.harmony.one/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}/instance/{tokenId}',
+    },
+    nativeCurrency: {
+      name: 'ONE',
+      symbol: 'ONE',
+      decimals: 18,
+    },
+    publicRpc: 'https://api.s0.b.hmny.io',
+  },
+  optimism: {
+    chainId: 10,
+    name: 'Optimism',
+    explorer: {
+      name: 'Optimism Explorer',
+      baseUrl: 'https://optimistic.etherscan.io/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
+    nativeCurrency: {
+      name: 'ETH',
+      symbol: 'ETH',
+      decimals: 18,
+    },
+    publicRpc: 'https://mainnet.optimism.io',
+  },
   polygon: {
     name: 'Polygon',
     chainId: 137,
-    enabled: true,
-    explorerName: 'Polygon Explorer',
-    explorerUrl: 'https://polygonscan.com/',
+    explorer: {
+      name: 'Polygon Explorer',
+      baseUrl: 'https://polygonscan.com/',
+      contractPathTemplate: 'token/{contractAddress}',
+      tokenPathTemplate: 'token/{contractAddress}?a={tokenId}',
+    },
     nativeCurrency: {
       name: 'POL',
       symbol: 'POL',

@@ -1,10 +1,17 @@
 import { StoreDefinition } from 'pinia';
+import { BlockchainConfig } from './blockchains';
 
+/**
+ * A metadata attribute for an NFT.
+ */
 export interface MetaDataAttribute {
   trait_type: string;
   value: string;
 }
 
+/**
+ * Metadata for an NFT.
+ */
 export interface NftMetaData {
   image: string;
   name: string;
@@ -12,6 +19,9 @@ export interface NftMetaData {
   attributes?: MetaDataAttribute[];
 }
 
+/**
+ * An NFT object.
+ */
 export interface Nft {
   tokenId: number;
   metaData: NftMetaData;
@@ -20,37 +30,102 @@ export interface Nft {
   privateData: object | null;
 }
 
+/**
+ * A collection of NFTs to be stored in Pinia.
+ */
 export interface NftCollection {
   items: Record<number, NftMetaData[]>; // Items are stored by page number.
   itemCount: number; // Total number of items in the collection.
   page: number; // Current page of the collection.
 }
 
+/**
+ * State for the NFT store.
+ */
 export interface NftStoreState {
-  itemCollections: Record<string, NftCollection>; // Collections stored by collection name.
+  // Collections stored by collection name.
+  itemCollections: Record<string, NftCollection>;
 }
 
+/**
+ * Getters for the NFT store.
+ */
 export interface NftStoreGetters {
   /**
-   * Gets the URL for an NFT based on its token ID and path.
+   * Gets the Blockchain Explorer URL to verify an NFT.
+   * @returns URL for viewing the NFT on the blockchain explorer.
    */
-  getNftUrl: (
+  explorerTokenUrl: () => (
     tokenId: string | number,
-    path: string
-  ) => (tokenId: string | number, path: string) => string;
+    contractAddress: string,
+    blockchainConfig: BlockchainConfig
+  ) => string;
 
   /**
-   * Appends an 'l' to the end of an image to get the large version from imgurl.
+   * Gets the Blockchain Explorer URL to verify a Smart Contract.
+   * @returns URL for viewing the Smart Contract on the blockchain explorer.
    */
-  getImageLarge: (url: string) => (url: string) => string;
+  explorerContractUrl: () => (
+    contractAddress: string,
+    blockchainConfig: BlockchainConfig
+  ) => string;
 
   /**
-   * Appends an 'm' to the end of an image to get the large version from imgurl.
+   * Gets a path (no base URL) to the NFT item on this website,
+   * used for creating QR Codes linking directly to items.
+   * @param tokenId - The token ID of the NFT item.
+   * @param nftStoreItemCollectionName - The name of the collection.
+   * @returns A website path to the NFT item. This path will
+   * still need a base URL prepended.
    */
-  getImageMedium: (url: string) => (url: string) => string;
+  nftPath: () => (
+    tokenId: number,
+    nftStoreItemCollectionName: string
+  ) => string;
 
   /**
-   * Gets a public attribute value from the NFT metadata.
+   * Gets a base URL to the NFT meta-data. This is only for use with  Dig-A-Hash Meta Data.
+   * @param contractPublicKey - The public key of the contract.
+   * @param chainId - The chain ID of the contract.
+   * @param contractAddress - The address of the contract.
+   * @returns The Dig-A-Hash Meta Data Base URL. This result will
+   * still need a token id appended.
+   */
+  digaMetaDataBaseUrl: () => (
+    contractPublicKey: string,
+    chainId: number,
+    contractAddress: string
+  ) => string;
+
+  /**
+   * Gets a full URL to the NFT meta-data. This is only for use with  Dig-A-Hash Meta Data.
+   * @param tokenId - The token ID of the NFT item.
+   * @param contractPublicKey - The public key of the contract.
+   * @param chainId - The chain ID of the contract.
+   * @param contractAddress - The address of the contract.
+   * @returns The Dig-A-Hash Meta Data URL.
+   */
+  digaMetaDataUrl: () => (
+    tokenId: number,
+    contractPublicKey: string,
+    chainId: number,
+    contractAddress: string
+  ) => string;
+
+  /**
+   * Appends an 'l' to the end of an image file name.
+   */
+  getImageLarge: () => (url: string) => string;
+
+  /**
+   * Appends an 'm' to the end of an image file name.
+   */
+  getImageMedium: () => (url: string) => string;
+
+  /**
+   * Gets a public attribute value from the NFT metadata by
+   * attribute name.
+   * @returns The value of the attribute, or `null` if not found.
    */
   getPublicAttributeValue: () => (
     metaData: NftMetaData,
@@ -58,6 +133,9 @@ export interface NftStoreGetters {
   ) => string | null;
 }
 
+/**
+ * Actions for the NFT store.
+ */
 export interface NftStoreActions {
   /**
    * Sets items for a specific page and collection.
