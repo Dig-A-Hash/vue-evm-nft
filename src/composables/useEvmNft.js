@@ -389,14 +389,14 @@ export async function useEvmNft(
       isAscending
     );
 
-    const tokenIds = Array.from(
-      // Create an array with 'balance' items
-      { length: _balance.value },
-      // For each item, give it a value starting from 'startTokenId'
-      (_, index) => _startTokenId.value + index
-    )
-      // Only keep the items from 'startIndex' to 'endIndex'
-      .slice(startIndex, endIndex);
+    const tokenIds = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      tokenIds.push(_startTokenId.value + i);
+    }
+
+    console.log('startIndex:', startIndex);
+    console.log('endIndex:', endIndex);
+    console.log('tokenIds:', tokenIds);
 
     const tokens = await getTokenMetaData(tokenIds);
 
