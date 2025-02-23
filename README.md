@@ -4,7 +4,7 @@ This package provides reusable [Vue 3](https://vuejs.org/) composable functions,
 
 No API is needed, the blockchain is the API!
 
-![](https://i.imgur.com/IF9VaIa.jpg)
+![](https://i.imgur.com/2lnsn52.jpg)
 
 ## Features
 
