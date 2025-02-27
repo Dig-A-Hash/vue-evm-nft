@@ -350,6 +350,11 @@ export async function useEvmNft(
 
     await _setStartTokenId();
     await _setBalance(holderPublicKey);
+
+    if (_balance.value === 0) {
+      return { tokens: [], pageSize, count: 0 };
+    }
+
     const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
       page,
       isAscending
@@ -384,6 +389,11 @@ export async function useEvmNft(
 
     await _setStartTokenId();
     await _setBalance(holderPublicKey);
+
+    if (_balance.value === 0) {
+      return { tokens: [], pageSize, count: 0 };
+    }
+
     const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
       page,
       isAscending
