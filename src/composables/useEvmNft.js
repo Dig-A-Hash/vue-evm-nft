@@ -404,10 +404,6 @@ export async function useEvmNft(
       tokenIds.push(_startTokenId.value + i);
     }
 
-    console.log('startIndex:', startIndex);
-    console.log('endIndex:', endIndex);
-    console.log('tokenIds:', tokenIds);
-
     const tokens = await getTokenMetaData(tokenIds);
 
     // Ensure we sort
