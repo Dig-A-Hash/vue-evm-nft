@@ -5,8 +5,8 @@ import { useEvmNftGallery } from '../../src/composables/useEvmNftGallery';
 import { blockchains } from '../../src/modules/blockchains';
 import { dahDemoV1Abi } from '../../src/modules/dahDemoV1Abi';
 
-let contractPublicKey = '0xcbb2a9868d73f24c056893131b97a69ffd36eba9';
-let contractAddress = '0x33f1cdD52e7ec6F65Ab93dD518c1e2EdB3a8Dd63';
+let contractPublicKey = '0xcbb2a9868d73f24c056893131b97a69ffd36eba9'; // DAH
+let contractAddress = '0x33f1cdD52e7ec6F65Ab93dD518c1e2EdB3a8Dd63'; // DAH - Roadmap - StartTokenId = 1
 let chainId = blockchains.avalanche.chainId;
 let itemsPerPage = 5;
 let nftStoreItemCollectionName = 'nftSmartContract1';
@@ -47,13 +47,13 @@ test('should fetch page 1 of NFTs by holder', async (t) => {
   await new Promise((resolve) => setTimeout(resolve, 1000));
 
   const nfts = wrapper.vm.nfts;
+  // console.dir(nfts);
   t.true(nfts.length === itemsPerPage);
   t.true(nfts[0].tokenId === 1);
   t.true(nfts[1].tokenId === 2);
   t.true(nfts[2].tokenId === 3);
   t.true(nfts[3].tokenId === 4);
   t.true(nfts[4].tokenId === 5);
-  // console.dir(nfts);
 });
 
 test('should fetch page 2 of NFTs by holder', async (t) => {

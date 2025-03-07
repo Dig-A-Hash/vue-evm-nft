@@ -5,8 +5,8 @@ import { useEvmNftGallery } from '../../src/composables/useEvmNftGallery';
 import { blockchains } from '../../src/modules/blockchains';
 import { dahNftV2Abi } from '../../src/modules/dahNftV2Abi';
 
-let contractPublicKey = '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4';
-let contractAddress = '0x9c870E5B8724Db43E58Cd62C424E3071A3FB66E9';
+let contractPublicKey = '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4'; // Dog-Plex
+let contractAddress = '0x9c870E5B8724Db43E58Cd62C424E3071A3FB66E9'; // Dog Plex - Services - StartTokenId = 0
 let chainId = blockchains.polygon.chainId;
 let itemsPerPage = 5;
 let nftStoreItemCollectionName = 'nftSmartContract1';

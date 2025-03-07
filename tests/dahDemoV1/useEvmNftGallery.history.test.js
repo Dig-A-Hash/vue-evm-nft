@@ -6,7 +6,7 @@ import { blockchains } from '../../src/modules/blockchains';
 import { dahDemoV1Abi } from '../../src/modules/dahDemoV1Abi';
 
 let contractPublicKey = '0xcbb2a9868d73f24c056893131b97a69ffd36eba9'; // DAH
-let contractAddress = '0x33f1cdD52e7ec6F65Ab93dD518c1e2EdB3a8Dd63'; // DAH - Roadmap
+let contractAddress = '0x33f1cdD52e7ec6F65Ab93dD518c1e2EdB3a8Dd63'; // DAH - Roadmap - StartTokenId = 1
 let chainId = blockchains.avalanche.chainId;
 let itemsPerPage = 5;
 let nftStoreItemCollectionName = 'nftSmartContract1';
@@ -156,7 +156,9 @@ test('should fetch page 1 of all NFTs on contract in desc order', async (t) => {
 });
 
 // This will not be supported. Keeping the test here for debugging and future purposes.
-test.only('should fetch page 1 of all NFTs on contract with burned NFTs', async (t) => {
+/*
+
+test.skip('should fetch page 1 of all NFTs on contract with burned NFTs', async (t) => {
   const wrapper = mount(
     {
       setup() {
@@ -196,3 +198,5 @@ test.only('should fetch page 1 of all NFTs on contract with burned NFTs', async 
   // t.true(nfts[4].tokenId === 2);
   // t.true(nfts[5].tokenId === 1);
 });
+
+*/
