@@ -66,6 +66,11 @@ export async function useEvmNft(
         return;
       }
 
+      if (holderPublicKey) {
+        _startTokenId.value = 0;
+        return;
+      }
+
       await contract.ownerOf(0);
       _startTokenId.value = 0;
     } catch {
@@ -98,12 +103,19 @@ export async function useEvmNft(
   }
 
   /**
-   * Calculates the start and end indexes for paginated data retrieval,
-   * adjusted for token balances and direction. This function is used
-   * for determining which subset of tokens to fetch on a specific page.
+   * Calculates the start and end indices (indexes) for token retrieval. This
+   * is where the main "business logic" for this package exists. This function
+   * is tricky because it supports the following features...
+   * - Paging
+   * - 0 Token Balance
+   * - Sort direction by Token ID in ascending or descending order.
+   * - Tokens in a specified wallet (using the holderPublicKey param).
+   * - Contracts that start at Token ID 0 or 1.
+   *  An important note is that when the holderPublicKey is provided, the
+   *  startTokenId is always 0. This is because the tokens are pulled from
+   *  the tokenOfOwnerByIndex function by index, which always starts at 0.
    * @private
    * @param {number} page - The current page number. Defaults to 1 if not provided.
-   * @param {number} pageSize - The number of tokens or items to display per page.
    * @param {boolean} isAscending - Determines the order of retrieval:
    *   - `true`: Retrieves items in ascending order.
    *   - `false`: Retrieves items in descending order.
@@ -117,17 +129,38 @@ export async function useEvmNft(
     page = page || 1;
 
     let startIndex, endIndex;
-    if (isAscending) {
-      startIndex = pageSize * (page - 1);
-      endIndex = Math.min(_balance.value, pageSize * page);
-    } else {
-      startIndex = Math.max(0, _balance.value - pageSize * page);
-      endIndex = _balance.value - pageSize * (page - 1);
+    const startTokenId = holderPublicKey ? 0 : _startTokenId.value;
+    var endIndexAdjustment = 0;
+    if (_startTokenId.value === 0) {
+      endIndexAdjustment = 1;
     }
 
-    if (_startTokenId.value === 0) {
-      endIndex--;
+    if (holderPublicKey) {
+      endIndexAdjustment = 1;
     }
+
+    if (isAscending) {
+      startIndex = Math.max(startTokenId, pageSize * (page - 1) + startTokenId);
+      endIndex = Math.min(
+        _balance.value - endIndexAdjustment,
+        pageSize * page - endIndexAdjustment
+      );
+    } else {
+      const startValueAdjusted = _startTokenId.value === 1 ? 0 : 1;
+      startIndex = Math.max(
+        startTokenId,
+        _balance.value + startTokenId - pageSize * page
+      );
+      endIndex =
+        _balance.value -
+        (holderPublicKey ? 1 : startValueAdjusted) -
+        pageSize * (page - 1);
+    }
+
+    // console.log('Start Index: ' + startIndex);
+    // console.log('End Index: ' + endIndex);
+    // console.log('Balance: ' + _balance.value);
+    // console.log('Start Token ID: ' + _startTokenId.value);
 
     return { startIndex, endIndex, lastPage };
   }
@@ -141,16 +174,13 @@ export async function useEvmNft(
    * @param {number} startIndex - The starting index for fetching tokens (adjusted
    * to the token IDs).
    * @param {number} endIndex - The ending index for fetching tokens.
-   * @returns {Promise<Object[]>} - A Promise that resolves to an array of objects,
-   * each containing:
+   * @returns {Promise<Object[]>} - A Promise that resolves to an array of objects
+   * in reverse order by tokenId, each containing:
    *   - `tokenId` (number): The ID of the fetched token.
    *   - `owner` (string): The address of the token's owner.
    */
-  async function _fetchAllTokens(startIndex, endIndex) {
+  async function _fetchContractTokens(startIndex, endIndex) {
     const batchedTokenIdPromises = [];
-
-    // Adjust startIndex to match token IDs for contracts starting at 0 or 1
-    startIndex += _startTokenId.value;
 
     for (
       let tokenId = endIndex;
@@ -184,12 +214,16 @@ export async function useEvmNft(
    * The tokens are fetched using `tokenOfOwnerByIndex`, which is
    * specific to the holder's address. Used only for getNfts with on-chain
    * validation.
+   *
+   * An important note is that when the holderPublicKey is provided, the
+   * startTokenId is always 0. This is because the tokens are pulled from
+   * the tokenOfOwnerByIndex function by index, which always starts at 0.
    * @private
    * @param {number} startIndex - The starting index for fetching tokens (inclusive).
    * @param {number} endIndex - The ending index for fetching tokens (inclusive).
    * @param {string} holderPublicKey - The public key (address) of the NFT holder.
-   * @returns {Promise<Object[]>} - A Promise that resolves to an array of objects,
-   * each containing:
+   * @returns {Promise<Object[]>} - A Promise that resolves to an array of objects
+   * in reverse order by tokenId, each containing:
    *   - `tokenId` (number): The ID of the fetched token.
    *   - `owner` (string): The holder's public key.
    */
@@ -197,7 +231,7 @@ export async function useEvmNft(
     const batchedTokenIdPromises = [];
 
     // Adjust indexes for fetching user's tokens
-    for (let i = endIndex - _startTokenId.value; i >= startIndex; i--) {
+    for (let i = endIndex; i >= startIndex; i--) {
       batchedTokenIdPromises.push(
         contract
           .tokenOfOwnerByIndex(holderPublicKey, i)
@@ -363,7 +397,7 @@ export async function useEvmNft(
     // Fetch tokens based on whether a specific wallet is provided or not
     const batchedTokenIds = holderPublicKey
       ? await _fetchUserTokens(startIndex, endIndex, holderPublicKey)
-      : await _fetchAllTokens(startIndex, endIndex);
+      : await _fetchContractTokens(startIndex, endIndex);
 
     const tokens = await _getMetaDataBatch(batchedTokenIds, isAscending);
 
@@ -401,7 +435,7 @@ export async function useEvmNft(
 
     const tokenIds = [];
     for (let i = startIndex; i <= endIndex; i++) {
-      tokenIds.push(_startTokenId.value + i);
+      tokenIds.push(i);
     }
 
     const tokens = await getTokenMetaData(tokenIds);
