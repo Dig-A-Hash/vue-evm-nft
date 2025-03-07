@@ -21,12 +21,12 @@ No API is needed, the blockchain is the API!
 
 ## Dependencies
 
-This package depends on other packages such as `axios`, `ethers.js`, `pinia`, and `vue`. Your project should already have these installed, this package has been tested with...
+This package will work with the following dependencies in your app, if they are already included.
 
-- axios 1.7.7+
-- ethers.js 6.13.3+
-- pinia 2.2.4+
-- vue 3.5.11+
+- [axios 1.x](https://github.com/axios/axios)
+- [ethers.js 6.x](https://github.com/ethers-io/ethers.js/)
+- [pinia 2.x or 3.x](https://github.com/vuejs/pinia)
+- [vue 3.x](https://github.com/vuejs/core)
 
 ## Installation
 
