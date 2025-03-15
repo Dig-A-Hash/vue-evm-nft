@@ -450,11 +450,65 @@ export async function useEvmNft(
     return { tokens, pageSize, count: _balance.value };
   }
 
+  /**
+   * Retrieves and paginates NFT metadata based on a provided (cached)
+   * token balance. This method optimizes performance by avoiding direct
+   * blockchain queries for token IDs, instead calculating them directly.
+   * If a chain ID is specified, this function will be extra fast because
+   * it can use Dig-A-Hash predictable meta data.
+   * @param {number} page - The page number for pagination. Defaults to 1 if not provided.
+   * @param {boolean} isAscending - If true, sorts tokens in ascending order by token ID; if false, descending order.
+   * @param {number} contractBalance - The number of NFTs on the contract.
+   * @param {number} contractStartTokenId - 1 or 0, the starting token ID.
+   * @returns {Promise<Object>} An object containing: {Array} tokens - An array of objects where each object includes token metadata, and token ID.
+   *   - {number} pageSize - The size of each page (number of items per page).
+   *   - {number} count - The total number of tokens or NFTs for the specified contract.
+   * @throws {Error} If the contract instance has not been initialized.
+   */
+  async function getDahCollection(
+    page,
+    isAscending,
+    contractBalance,
+    contractStartTokenId
+  ) {
+    _contractRequired();
+    loadingMessage.value = 'Connecting to CDN...';
+
+    _startTokenId.value = contractStartTokenId;
+    _balance.value = contractBalance;
+
+    if (_balance.value === 0) {
+      return { tokens: [], pageSize, count: 0 };
+    }
+
+    const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
+      page,
+      isAscending
+    );
+
+    const tokenIds = [];
+    for (let i = startIndex; i <= endIndex; i++) {
+      tokenIds.push(i);
+    }
+
+    const tokens = await getTokenMetaData(tokenIds);
+
+    // Ensure we sort
+    if (isAscending) {
+      tokens.sort((a, b) => a.tokenId - b.tokenId);
+    } else {
+      tokens.sort((a, b) => b.tokenId - a.tokenId);
+    }
+
+    return { tokens, pageSize, count: _balance.value };
+  }
+
   return {
     getNfts,
     getTokenOwner,
     getTokenMetaData,
     loadingMessage,
     getMetaDataCollection,
+    getDahCollection,
   };
 }
