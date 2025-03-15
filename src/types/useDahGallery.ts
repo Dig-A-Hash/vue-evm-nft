@@ -1,4 +1,4 @@
-import { type ref, Ref } from 'vue';
+import { type Ref } from 'vue';
 import { type Nft } from './useNftStore';
 
 /**
