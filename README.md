@@ -23,7 +23,7 @@ No API is needed, the blockchain is the API!
 
 This package will work with the following dependencies in your app, if they are already included.
 
-- [axios 1.x](https://github.com/axios/axios)
+- [axios 1.8.2](https://github.com/axios/axios)
 - [ethers.js 6.x](https://github.com/ethers-io/ethers.js/)
 - [pinia 2.x or 3.x](https://github.com/vuejs/pinia)
 - [vue 3.x](https://github.com/vuejs/core)
@@ -178,6 +178,46 @@ const {
 - **`getNftPage`**: An async function that takes a param indicating which page of NFTs to fetch from the contract. This is only a utility/convenience function that is not required. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getNftPage until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
 - **`getTokenOwner`**: An async function to get the current token holder wallet address. This is only a utility/convenience function that is not required. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getTokenMetaData until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
 - **`getTokenMetaData`**: An async function to get meta data for an array of Token Ids. This is only a utility/convenience function that is not required. If chain ID is not null, then we get the meta data without needing to access the blockchain at all because we use Dig-A-Hash predictable storage paths based on that chain ID. This function is not ready to fire until isLoading is true. Watch isLoading and do not fire getTokenMetaData until isLoading has been set to false at least once. Most likely, you should just use the useEvmNft composable to get this function, unless you have already called this composable, because this composable will return the first page of NFTs regardless.
+
+## useDahGallery Composable
+
+This composable is exactly like the useEvmMetaDataGallery but this composable requires two new props to the config because there is absolutely no on-chain validation at all using this composable. This is the fastest, and most reliable method.
+
+## Usage
+
+```javascript
+import {
+  useEvmMetaDataGallery,
+  blockchains,
+  dahDemoV1Abi as abi,
+} from 'vue-evm-nft';
+
+const {
+  page,
+  numberOfPages,
+  nfts,
+  isLoading,
+  isAscending,
+  toggleSortOrder,
+} = useEvmMetaDataGallery({
+  contractPublicKey,
+  contractAddress,
+  abi,
+  chainId: blockchains.fantom.chainId,
+  rpc: blockchains.fantom.publicRpc,
+  itemsPerPage,
+  nftStoreItemCollectionName,
+  isAscendingSort: false,
+  isGetAllNftQuery: false,
+  startTokenId: 0 // new
+  supply: 500 // new
+});
+```
+
+#### Configuration Object (config: DahGalleryOptions)
+- **`All items from useEvmMetaDataGallery config`**: All items from the useEvmMetaDataGallery config object are used here the same way. Two new options must be specified below. 
+- **`startTokenId`**: A number indicating the starting token id for the collection, usually 0 or 1.
+- **`supply`**: A number specifying the total supply count of all NFTs on contract.
 
 ## useEvmNft Composable
 The useEvmNft composable is the core composable used internally by both useEvmNftGallery, and useEvmMetaDataGallery. 
