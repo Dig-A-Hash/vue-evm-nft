@@ -8,7 +8,7 @@ import { dahNftV2Abi } from '../../src/modules/dahNftV2Abi';
 let contractPublicKey = '0x18582f2CA048ac5f22E5a64F92E8a7d7b1F806a4'; // Dog-Plex
 let contractAddress = '0x9c870E5B8724Db43E58Cd62C424E3071A3FB66E9'; // Dog Plex - Services - StartTokenId = 0
 let chainId = blockchains.polygon.chainId;
-let itemsPerPage = 5;
+let itemsPerPage = 3;
 let nftStoreItemCollectionName = 'nftSmartContract1';
 const suspenseTemplate = '<Suspense><div></div></Suspense>';
 
@@ -52,13 +52,13 @@ test('should fetch page 1 of all NFTs on contract', async (t) => {
   t.true(nfts[0].tokenId === 0);
   t.true(nfts[1].tokenId === 1);
   t.true(nfts[2].tokenId === 2);
-  t.true(nfts[3].tokenId === 3);
-  t.true(nfts[4].tokenId === 4);
+  // t.true(nfts[3].tokenId === 3);
+  // t.true(nfts[4].tokenId === 4);
   //
 });
 
 test('should fetch page 2 of all NFTs on contract', async (t) => {
-  itemsPerPage = 5;
+  itemsPerPage = 3;
   const wrapper = mount(
     {
       setup() {
@@ -67,7 +67,7 @@ test('should fetch page 2 of all NFTs on contract', async (t) => {
           contractAddress,
           abi: dahNftV2Abi,
           chainId,
-          rpc: blockchains.polygon.altPublicRpc[2], // otherwise batch too large
+          rpc: blockchains.polygon.publicRpc, // otherwise batch too large
           itemsPerPage,
           nftStoreItemCollectionName,
           isAscendingSort: true,

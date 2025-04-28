@@ -475,29 +475,79 @@ export async function useEvmNft(
     loadingMessage.value = 'Connecting to CDN...';
 
     _startTokenId.value = contractStartTokenId;
-    _balance.value = contractBalance;
 
+    // If contractBalance is provided, use it; otherwise, assume a large collection
+    if (contractBalance !== null) {
+      _balance.value = contractBalance;
+    } else {
+      _balance.value = Number.MAX_SAFE_INTEGER;
+
+      // Fetch the requested page's metadata to check for nulls
+      const { startIndex, endIndex } = _calculatePageIndexes(page, isAscending);
+
+      const tokenIds = [];
+      for (let i = startIndex; i <= endIndex; i++) {
+        tokenIds.push(i);
+      }
+
+      const tokens = await getTokenMetaData(tokenIds);
+
+      // If all metadata is null, estimate balance as less than startIndex
+      const allNull = tokens.every((token) => token.metaData === null);
+      if (allNull && startIndex > _startTokenId.value) {
+        _balance.value = startIndex - _startTokenId.value;
+      }
+
+      // If some metadata is null, estimate balance based on first null
+      if (!allNull) {
+        const firstNullIndex = tokens.findIndex(
+          (token) => token.metaData === null
+        );
+        if (firstNullIndex !== -1) {
+          _balance.value = startIndex + firstNullIndex - _startTokenId.value;
+        }
+      }
+
+      // Return tokens including nulls
+      if (_balance.value === 0) {
+        return { tokens: [], pageSize, count: 0 };
+      }
+
+      // Filter nulls and sort
+      const validTokens = tokens.filter((token) => token.metaData !== null);
+      if (isAscending) {
+        validTokens.sort((a, b) => a.tokenId - b.tokenId);
+      } else {
+        validTokens.sort((a, b) => b.tokenId - b.tokenId);
+      }
+
+      return { tokens, pageSize, count: _balance.value };
+    }
+
+    // For known contractBalance, proceed as original
     if (_balance.value === 0) {
       return { tokens: [], pageSize, count: 0 };
     }
 
-    const { startIndex, endIndex, lastPage } = _calculatePageIndexes(
-      page,
-      isAscending
-    );
+    const { startIndex, endIndex } = _calculatePageIndexes(page, isAscending);
 
     const tokenIds = [];
-    for (let i = startIndex; i <= endIndex; i++) {
+    for (
+      let i = startIndex;
+      i <= endIndex && i < _balance.value + _startTokenId.value;
+      i++
+    ) {
       tokenIds.push(i);
     }
 
     const tokens = await getTokenMetaData(tokenIds);
 
-    // Ensure we sort
+    // Filter out null metadata and sort
+    const validTokens = tokens.filter((token) => token.metaData !== null);
     if (isAscending) {
-      tokens.sort((a, b) => a.tokenId - b.tokenId);
+      validTokens.sort((a, b) => a.tokenId - b.tokenId);
     } else {
-      tokens.sort((a, b) => b.tokenId - a.tokenId);
+      validTokens.sort((a, b) => b.tokenId - b.tokenId);
     }
 
     return { tokens, pageSize, count: _balance.value };

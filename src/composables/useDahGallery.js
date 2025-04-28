@@ -147,8 +147,8 @@ export function useDahGallery(config) {
   }
 
   /**
-   * Fetches all NFTs and associated metadata for a given contract in a loop
-   * with no paging.
+   * Fetches all NFTs and associated metadata for a given contract
+   * in groups by page size.
    */
   async function getAllNfts() {
     try {
