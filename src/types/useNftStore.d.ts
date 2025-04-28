@@ -34,7 +34,7 @@ export interface Nft {
  * A collection of NFTs to be stored in Pinia.
  */
 export interface NftCollection {
-  items: Record<number, NftMetaData[]>; // Items are stored by page number.
+  items: Nft[]; // Items are stored by page number.
   itemCount: number; // Total number of items in the collection.
   page: number; // Current page of the collection.
 }

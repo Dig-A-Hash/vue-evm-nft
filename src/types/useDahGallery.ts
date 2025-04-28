@@ -15,7 +15,7 @@ export interface DahGalleryOptions {
   isAscendingSort: boolean;
   isGetAllNftQuery: boolean;
   startTokenId: number;
-  supply: number;
+  supply: number | null;
 }
 
 /**
