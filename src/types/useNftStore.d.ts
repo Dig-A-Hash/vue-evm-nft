@@ -1,5 +1,5 @@
 import { StoreDefinition } from 'pinia';
-import { BlockchainConfig } from './blockchains';
+import { BlockchainConfig } from './blockchains.js';
 
 /**
  * A metadata attribute for an NFT.

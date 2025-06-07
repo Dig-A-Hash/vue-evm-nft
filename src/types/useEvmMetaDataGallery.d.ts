@@ -1,5 +1,5 @@
 import { type ref, Ref } from 'vue';
-import { type Nft } from './useNftStore';
+import { type Nft } from './useNftStore.js';
 
 /**
  * The EvmMetaDataOptions configuration object for the useEvmMetaDataGallery composable.

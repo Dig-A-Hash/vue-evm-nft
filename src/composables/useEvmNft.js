@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { ethers } from 'ethers';
 import { ref } from 'vue';
-import { DIG_A_HASH_BASE_URL } from '../modules/constants';
+import { DIG_A_HASH_BASE_URL } from '../modules/constants.js';
 
 /**
  * Gets contract and NFT data from the Blockchain by setting up the

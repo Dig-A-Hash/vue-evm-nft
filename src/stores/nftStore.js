@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { DIG_A_HASH_BASE_URL } from '../modules/constants';
+import { DIG_A_HASH_BASE_URL } from '../modules/constants.js';
 
 /**
  * Gets the base URL for all DAH meta data.

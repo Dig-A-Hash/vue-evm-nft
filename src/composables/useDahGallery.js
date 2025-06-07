@@ -1,6 +1,6 @@
 import { ref, onMounted, watch } from 'vue';
-import { useEvmNft } from './useEvmNft';
-import { useNftStore } from '../stores/nftStore';
+import { useEvmNft } from './useEvmNft.js';
+import { useNftStore } from '../stores/nftStore.js';
 import { ethers } from 'ethers';
 
 /**

@@ -1,5 +1,5 @@
 import { type Ref } from 'vue';
-import { type Nft } from './useNftStore';
+import { type Nft } from './useNftStore.js';
 
 /**
  * The DahGalleryOptions configuration object for the useDahGallery composable.

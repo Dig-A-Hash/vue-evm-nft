@@ -1,6 +1,6 @@
 import { Ref } from 'vue';
 import { ethers } from 'ethers';
-import { Nft, NftMetaData } from './useNftStore';
+import { Nft, NftMetaData } from './useNftStore.js';
 
 /**
  * Composable for interacting with EVM-based NFT contracts.
