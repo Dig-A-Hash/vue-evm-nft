@@ -1,9 +1,15 @@
 {
   "name": "vue-evm-nft",
-  "version": "1.6.2",
+  "version": "1.7.0",
   "type": "module",
   "main": "src/index.js",
   "types": "src/types/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./src/index.js",
+      "types": "./src/types/index.d.ts"
+    }
+  },
   "scripts": {
     "test": "ava"
   },
