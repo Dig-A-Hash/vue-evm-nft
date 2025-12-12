@@ -328,7 +328,7 @@ export async function useEvmNft(
     const metaDataPromises = metaDataUrls.map(async (metaDataUrl) => {
       var publicMetaData = {};
       try {
-        publicMetaData = await axios.get(metaDataUrl + '?v=' + Date.now());
+        publicMetaData = await axios.get(metaDataUrl);
       } catch (error) {
         publicMetaData.data = null;
       }
