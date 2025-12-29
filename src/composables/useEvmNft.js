@@ -471,7 +471,7 @@ export async function useEvmNft(
     contractBalance,
     contractStartTokenId
   ) {
-    _contractRequired();
+    // _contractRequired();
     loadingMessage.value = 'Connecting to CDN...';
 
     _startTokenId.value = contractStartTokenId;

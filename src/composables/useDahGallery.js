@@ -43,7 +43,6 @@ export function useDahGallery(config) {
 
   // Proxy functions from useEvmNft.
   let _getMyNfts = null;
-  let _getTokenOwner = null;
   let _getTokenMetaData = null;
 
   onMounted(async () => {
@@ -63,7 +62,6 @@ export function useDahGallery(config) {
 
     // Set the function pointer for calling later, after mount.
     _getMyNfts = evmNft.getDahCollection;
-    _getTokenOwner = evmNft.getTokenOwner;
     _getTokenMetaData = evmNft.getTokenMetaData;
 
     if (isGetAllNftQuery) {
@@ -167,11 +165,12 @@ export function useDahGallery(config) {
 
   /**
    * Fetches the owner of a specific token by its ID. Exposing a proxy function for evmNft.
+   * Modified to return a contractPublicKey directly.
    * @param {number} tokenId - The ID of the token to look up the owner for.
    * @returns {Promise<string>} - A promise that resolves with the owner’s address.
    */
   async function getTokenOwner(tokenId) {
-    return await _getTokenOwner(tokenId);
+    return `${contractPublicKey}`;
   }
 
   /**

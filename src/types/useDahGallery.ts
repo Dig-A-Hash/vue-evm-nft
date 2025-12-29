@@ -7,9 +7,9 @@ import { type Nft } from './useNftStore.js';
 export interface DahGalleryOptions {
   contractPublicKey: string;
   contractAddress: string;
-  abi: any[];
+  abi: any[] | null;
   chainId: number | null;
-  rpc: string;
+  rpc: string | null;
   itemsPerPage: number;
   nftStoreItemCollectionName: string;
   isAscendingSort: boolean;
